@@ -445,6 +445,162 @@ body.auction-active #summary-screen [class*="bg-amber-500/"] {
   color: var(--arena-accent) !important;
 }
 </style>
+
+<style id="mobile-polish">
+/* Mobile-first polish: preserves the existing desktop layout and app logic. */
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+button, input, select, textarea { touch-action: manipulation; }
+button { -webkit-tap-highlight-color: transparent; }
+
+@media (max-width: 767px) {
+  body { min-height: 100svh; }
+  #app-header > div {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  #app-header h1 {
+    font-size: clamp(13px, 4vw, 17px);
+    line-height: 1.15;
+    letter-spacing: .06em;
+  }
+  #app-header .w-10 {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+  }
+  #app-header .flex.items-center.space-x-3 { gap: 8px; }
+
+  main {
+    width: 100%;
+    padding: 12px !important;
+    justify-content: flex-start !important;
+  }
+  #auction-screen {
+    gap: 14px !important;
+    width: 100%;
+  }
+  #auction-screen > div { min-width: 0; }
+  #auction-screen > div > .bg-slate-900\/95 {
+    padding: 14px !important;
+    border-radius: 20px !important;
+  }
+  #auction-screen .grid.my-4 {
+    gap: 14px !important;
+    margin-top: 14px !important;
+    margin-bottom: 14px !important;
+  }
+  #stage-card {
+    width: min(100%, 360px) !important;
+    max-width: 360px !important;
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+  #stage-card img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+  #auction-screen label { font-size: 11px !important; }
+  #host-player-select, #host-bid-input {
+    min-height: 46px;
+    font-size: 14px !important;
+    border-radius: 12px !important;
+  }
+  #auction-screen button {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  #auction-screen #btn-sell-direct {
+    min-height: 50px;
+    font-size: 13px;
+  }
+  #auction-screen #btn-undo-sale { min-height: 46px; }
+  #auction-screen [aria-label="Quick bid increments"] button {
+    min-height: 46px;
+    font-size: 14px;
+  }
+  #host-feed-log {
+    height: 88px !important;
+    font-size: 11px !important;
+    overflow-wrap: anywhere;
+  }
+  #rosters-container { gap: 10px; }
+  #rosters-container > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  #auction-screen .rounded-2xl,
+  #auction-screen .rounded-3xl { scroll-margin-top: 76px; }
+
+  #summary-screen {
+    padding: 8px 0 24px !important;
+    margin: 0 auto !important;
+    gap: 16px !important;
+  }
+  #summary-screen h2 {
+    font-size: clamp(27px, 8vw, 38px) !important;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+  }
+  #summary-screen button {
+    min-height: 46px;
+    max-width: 100%;
+  }
+  #summary-screen > * { min-width: 0; }
+  #toast {
+    left: 12px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Setup screen: keep its established artwork/theme, improve phone fit. */
+  #setup-screen { min-height: 100svh; padding-bottom: max(22px, env(safe-area-inset-bottom)); }
+  .home-topbar {
+    padding: 10px 14px !important;
+    min-height: 58px;
+  }
+  .home-hero {
+    height: clamp(220px, 58vw, 330px) !important;
+    min-height: 220px;
+  }
+  #setup-screen .home-content,
+  #setup-screen .setup-content,
+  #setup-screen .home-panel {
+    max-width: 100%;
+  }
+  #setup-screen form {
+    width: min(100% - 24px, 560px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #setup-screen input,
+  #setup-screen select {
+    min-height: 46px;
+    font-size: 16px;
+  }
+  #setup-screen button { min-height: 46px; }
+  #setup-screen .home-foot { padding: 0 14px; text-align: center; }
+}
+
+@media (max-width: 420px) {
+  main { padding: 9px !important; }
+  #auction-screen > div > .bg-slate-900\/95 { padding: 11px !important; }
+  #stage-card { padding: 13px !important; }
+  #auction-screen .text-xs { line-height: 1.45; }
+  #auction-screen .tracking-widest { letter-spacing: .08em; }
+  #app-header p { font-size: 8px !important; letter-spacing: .1em; }
+  #draft-progress-badge { font-size: 9px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-slide { animation: none !important; }
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
+</style>
+
 </head>
 <body class="flex flex-col min-h-screen justify-between selection:bg-amber-500 selection:text-slate-950">
 
@@ -504,6 +660,7 @@ body.auction-active #summary-screen [class*="bg-amber-500/"] {
         </div>
 
         <div class="home-panel">
+            <div class="max-w-5xl mx-auto px-4 pt-4"><button type="button" onclick="app.openMultiplayer()" class="w-full sm:w-auto px-5 py-3 rounded-xl border border-violet-400/50 bg-violet-950/60 hover:bg-violet-900/70 text-violet-100 font-black text-sm shadow-lg"><i class="fa-solid fa-users mr-2"></i> Multiplayer Room <span class="text-violet-300 font-semibold">· Play on separate phones</span></button></div>
             <form id="setup-form" onsubmit="app.startDraft(event)">
                 <div>
                     <h3 class="home-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Choose Anime Universes</h3>
@@ -1641,10 +1798,140 @@ body.auction-active #summary-screen [class*="bg-amber-500/"] {
                     this.updateUndoButton();
                 }
             }
+
+            async openMultiplayer() {
+                document.getElementById('multiplayer-overlay').classList.remove('hidden');
+                this.mpMessage('Connecting to multiplayer…');
+                try {
+                    await this.mpInitClient();
+                    let { data: { session } } = await this.mpClient.auth.getSession();
+                    if (!session) {
+                        const { data, error } = await this.mpClient.auth.signInAnonymously();
+                        if (error) throw error;
+                        session = data.session;
+                    }
+                    document.getElementById('mp-identity').textContent = 'Connected with a temporary guest identity on this device. Keep this browser data to reconnect.';
+                    this.mpMessage('Ready. Create a room or join with a room code.');
+                    if (this.mpRoomId) await this.mpRefreshRoom(); else { try { const saved=JSON.parse(localStorage.getItem('animeDraftArenaMultiplayerRoomV1')||'null'); if(saved?.room_id){ const {data:{user}}=await this.mpClient.auth.getUser(); const {data:member}=await this.mpClient.from('room_members').select('room_id').eq('room_id',saved.room_id).eq('user_id',user.id).maybeSingle(); if(member){ await this.mpEnterRoom({room_id:saved.room_id,room_code:saved.room_code}); } else localStorage.removeItem('animeDraftArenaMultiplayerRoomV1'); } } catch(e){} }
+                } catch (e) { this.mpMessage(e.message || 'Could not connect. Check the Supabase Auth settings.'); }
+            }
+
+            closeMultiplayer() { document.getElementById('multiplayer-overlay').classList.add('hidden'); }
+            mpMessage(message) { const el=document.getElementById('mp-message'); if(el) el.textContent=message; }
+            async mpInitClient() {
+                if (this.mpClient) return;
+                if (!window.supabase?.createClient) {
+                    await new Promise((resolve,reject)=>{ const sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js'; sc.onload=resolve; sc.onerror=()=>reject(new Error('Could not load the Supabase client library.')); document.head.appendChild(sc); });
+                }
+                this.mpClient = window.supabase.createClient('https://semnjegtcljjddgnhyrl.supabase.co','sb_publishable_fye64dOUCq4qNDGeJclWmQ_gmEytiWn',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+            }
+            async mpCreateRoom() {
+                try { await this.mpInitClient(); const nickname=document.getElementById('mp-create-name').value.trim();
+                    const budget=Number(document.getElementById('mp-budget').value), squad=Number(document.getElementById('mp-squad').value);
+                    const {data,error}=await this.mpClient.rpc('create_draft_room',{p_nickname:nickname,p_budget:budget,p_squad_limit:squad}); if(error) throw error;
+                    await this.mpEnterRoom(data); this.mpMessage('Room created. Share the code with your friends.');
+                } catch(e){this.mpMessage(e.message||'Could not create room.');}
+            }
+            async mpJoinRoom() {
+                try { await this.mpInitClient(); const nickname=document.getElementById('mp-join-name').value.trim(), code=document.getElementById('mp-room-code').value.trim().toUpperCase();
+                    const {data,error}=await this.mpClient.rpc('join_draft_room',{p_code:code,p_nickname:nickname}); if(error) throw error;
+                    await this.mpEnterRoom(data); this.mpMessage('Joined room. Waiting for the host.');
+                } catch(e){this.mpMessage(e.message||'Could not join room.');}
+            }
+            async mpEnterRoom(data) {
+                this.mpRoomId=data.room_id; this.mpRoomCode=data.room_code; try{localStorage.setItem('animeDraftArenaMultiplayerRoomV1',JSON.stringify({room_id:data.room_id,room_code:data.room_code}));}catch(e){} this.mpLastAuction=null;
+                document.getElementById('mp-lobby-controls').classList.add('hidden'); document.getElementById('mp-room-panel').classList.remove('hidden');
+                document.getElementById('mp-room-code-display').textContent=this.mpRoomCode;
+                if(this.mpChannel) await this.mpClient.removeChannel(this.mpChannel);
+                this.mpChannel=this.mpClient.channel('draft-room-'+this.mpRoomId)
+                  .on('postgres_changes',{event:'*',schema:'public',table:'rooms',filter:'id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
+                  .on('postgres_changes',{event:'*',schema:'public',table:'room_members',filter:'room_id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
+                  .on('postgres_changes',{event:'*',schema:'public',table:'auctions',filter:'room_id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
+                  .on('postgres_changes',{event:'*',schema:'public',table:'bids',filter:'room_id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
+                  .on('postgres_changes',{event:'*',schema:'public',table:'roster_entries',filter:'room_id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
+                  .subscribe();
+                await this.mpRefreshRoom();
+            }
+            async mpRefreshRoom() {
+                if(!this.mpRoomId||!this.mpClient)return;
+                try {
+                    const [roomRes,membersRes,auctionRes,rosterRes,userRes]=await Promise.all([
+                      this.mpClient.from('rooms').select('*').eq('id',this.mpRoomId).single(),
+                      this.mpClient.from('room_members').select('*').eq('room_id',this.mpRoomId).order('joined_at'),
+                      this.mpClient.from('auctions').select('*').eq('room_id',this.mpRoomId).order('sequence_no',{ascending:false}).limit(1),
+                      this.mpClient.from('roster_entries').select('*').eq('room_id',this.mpRoomId).order('purchased_at'),
+                      this.mpClient.auth.getUser()
+                    ]);
+                    for(const x of [roomRes,membersRes,auctionRes,rosterRes]) if(x.error) throw x.error;
+                    this.mpRoom=roomRes.data; this.mpMembers=membersRes.data||[]; this.mpRoster=rosterRes.data||[]; this.mpUserId=userRes.data.user?.id;
+                    this.mpAuction=auctionRes.data?.[0]||null;
+                    const host=this.mpRoom.host_user_id===this.mpUserId;
+                    document.getElementById('mp-room-status').textContent=this.mpRoom.status.toUpperCase()+(host?' · YOU ARE HOST':'');
+                    document.getElementById('mp-players').innerHTML=this.mpMembers.map(m=>`<div class="flex justify-between gap-2"><span>${this.mpEscape(m.nickname)} ${m.is_host?'(Host)':''}</span><span class="text-slate-400">$${Number(m.budget).toFixed(0)}</span></div>`).join('');
+                    const hostControls=document.getElementById('mp-host-controls');
+                    hostControls.innerHTML=host? (this.mpRoom.status==='lobby'?'<button onclick="app.mpStartDraft()" class="w-full rounded-lg bg-violet-600 p-3 text-white font-black">Host: Load characters & start</button>':`<div class="flex gap-2"><button onclick="app.mpSetStatus('paused')" class="flex-1 rounded-lg bg-slate-700 p-2 text-white text-xs">Pause</button><button onclick="app.mpSetStatus('active')" class="flex-1 rounded-lg bg-slate-700 p-2 text-white text-xs">Resume</button><button onclick="app.mpSetStatus('finished')" class="flex-1 rounded-lg bg-red-800 p-2 text-white text-xs">Finish</button></div>`):'Only the host controls the draft.';
+                    const auction=this.mpAuction, auctionBox=document.getElementById('mp-auction');
+                    if(auction){
+                      auctionBox.classList.remove('hidden'); const c=auction.character_data||{};
+                      document.getElementById('mp-character').textContent=c.name||'Current character'; document.getElementById('mp-character-image').innerHTML=c.img?`<img src="${this.mpEscape(c.img)}" alt="${this.mpEscape(c.name||'Character')}" class="w-full max-h-56 object-contain rounded-lg" loading="lazy">`:'';
+                      document.getElementById('mp-auction-state').textContent=auction.status.toUpperCase();
+                      document.getElementById('mp-highest-bid').textContent=auction.highest_bid==null?'No bids yet':'$'+Number(auction.highest_bid).toFixed(0);
+                      const bidder=this.mpMembers.find(m=>m.user_id===auction.highest_bidder);
+                      document.getElementById('mp-highest-bidder').textContent=bidder?'Highest bidder: '+bidder.nickname:'';
+                      document.getElementById('mp-bid-controls').classList.toggle('hidden',auction.status!=='open'||this.mpRoom.status!=='active');
+                      document.getElementById('mp-host-end').classList.toggle('hidden',!host||auction.status!=='open');
+                      document.getElementById('mp-auction-next').classList.toggle('hidden',!host||auction.status==='open'||this.mpRoom.status!=='active');
+                    } else auctionBox.classList.add('hidden');
+                    const rosters=document.getElementById('mp-rosters');
+                    rosters.innerHTML=this.mpMembers.map(m=>{const rows=this.mpRoster.filter(r=>r.member_user_id===m.user_id); const spent=rows.reduce((a,r)=>a+Number(r.price),0);return `<div class="rounded-lg bg-slate-900 p-2"><div class="flex justify-between"><b>${this.mpEscape(m.nickname)}</b><span class="text-amber-300">$${(Number(m.budget)-spent).toFixed(0)} left</span></div><div class="text-slate-400 text-xs">${rows.length}/${m.squad_limit} characters</div><div class="text-xs text-slate-300">${rows.map(r=>this.mpEscape(r.character_data?.name||r.character_id)+' ($'+Number(r.price)+')').join(' · ')||'No characters yet'}</div></div>`}).join('');
+                } catch(e){this.mpMessage(e.message||'Could not refresh room state.');}
+            }
+            mpEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+            async mpStartDraft(){
+                try{this.mpMessage('Loading character pool from AniList…'); const keys=[...this.selectedAnimes]; let pool=[];
+                  for(const key of keys){let part=await poolService.load(key);if(part.length<15&&ANIME_DATABASE[key])part=ANIME_DATABASE[key].map(c=>({...c,img:null}));pool=pool.concat(part);}
+                  const seen=new Set();pool=pool.filter(c=>!seen.has(c.id)&&seen.add(c.id)); if(pool.length<10)throw new Error('Not enough characters loaded.');
+                  const queue=pool.sort(()=>Math.random()-.5); const {data:count,error:queueError}=await this.mpClient.rpc('host_save_character_queue',{p_room_id:this.mpRoomId,p_queue:queue});if(queueError)throw queueError;
+                  this.mpMessage(`${count} characters saved to the room. Starting first auction…`); await this.mpNextCharacter();
+                }catch(e){this.mpMessage(e.message||'Could not load the character pool.');}
+            }
+            async mpNextCharacter(){
+                try{const {error}=await this.mpClient.rpc('host_start_next_auction',{p_room_id:this.mpRoomId});if(error)throw error;
+                  this.mpMessage('Auction opened. Players can bid or permanently pass.');await this.mpRefreshRoom();
+                }catch(e){this.mpMessage(e.message||'Could not start next auction.');}
+            }
+            async mpPlaceBid(){try{const amount=Number(document.getElementById('mp-bid-amount').value);const {error}=await this.mpClient.rpc('place_draft_bid',{p_auction_id:this.mpAuction.id,p_amount:amount});if(error)throw error;document.getElementById('mp-bid-amount').value='';await this.mpRefreshRoom();}catch(e){this.mpMessage(e.message||'Bid failed.');}}
+            async mpPass(){try{const {error}=await this.mpClient.rpc('pass_draft_character',{p_auction_id:this.mpAuction.id});if(error)throw error;this.mpMessage('Passed permanently on this character.');}catch(e){this.mpMessage(e.message||'Could not pass.');}}
+            async mpEndAuction(){try{const {data,error}=await this.mpClient.rpc('host_end_draft_auction',{p_auction_id:this.mpAuction.id});if(error)throw error;this.mpMessage(data.result==='sold'?'Auction ended and winner recorded.':'No bids — character marked unsold.');await this.mpRefreshRoom();}catch(e){this.mpMessage(e.message||'Could not end auction.');}}
+            async mpSetStatus(status){try{const {error}=await this.mpClient.rpc('host_set_draft_room_status',{p_room_id:this.mpRoomId,p_status:status});if(error)throw error;await this.mpRefreshRoom();}catch(e){this.mpMessage(e.message||'Could not update room.');}}
+            mpCopyCode(){if(this.mpRoomCode)navigator.clipboard?.writeText(this.mpRoomCode).then(()=>this.mpMessage('Room code copied.')).catch(()=>this.mpMessage('Room code: '+this.mpRoomCode));}
+            async mpLeaveRoom(){if(this.mpChannel)await this.mpClient.removeChannel(this.mpChannel);this.mpChannel=null;this.mpRoomId=null;this.mpRoom=null;this.mpAuction=null;try{localStorage.removeItem('animeDraftArenaMultiplayerRoomV1');}catch(e){}document.getElementById('mp-room-panel').classList.add('hidden');document.getElementById('mp-lobby-controls').classList.remove('hidden');this.mpMessage('You left the room on this device.');}
         }
 
         const app = new App();
         window.onload = () => app.init();
     </script>
+
+<div id="multiplayer-overlay" class="hidden fixed inset-0 z-[100] overflow-y-auto bg-slate-950/95 backdrop-blur-md p-3 sm:p-6">
+ <div class="max-w-3xl mx-auto my-3 sm:my-8 rounded-2xl border border-violet-500/30 bg-slate-900 shadow-2xl overflow-hidden">
+  <div class="p-4 sm:p-6 border-b border-slate-700 flex items-center justify-between gap-3"><div><div class="text-violet-300 text-[10px] uppercase tracking-[.25em] font-black">Anime Draft Arena</div><h2 class="text-2xl font-black text-white">Multiplayer Room</h2><p class="text-xs text-slate-400 mt-1">Everyone joins from their own phone · host ends each auction</p></div><button onclick="app.closeMultiplayer()" class="rounded-lg bg-slate-800 px-3 py-2 text-slate-300" aria-label="Close multiplayer"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="p-4 sm:p-6 space-y-4">
+   <div id="mp-identity" class="rounded-xl bg-slate-800/70 p-3 text-xs text-slate-300">Connecting securely…</div>
+   <div id="mp-lobby-controls" class="grid sm:grid-cols-2 gap-3">
+    <div class="rounded-xl border border-slate-700 p-4 space-y-3"><h3 class="font-black text-white">Create a room</h3><input id="mp-create-name" maxlength="24" placeholder="Your nickname" class="w-full rounded-lg bg-slate-950 border border-slate-700 p-3 text-white"><label class="block text-xs text-slate-400">Starting budget<input id="mp-budget" type="number" min="1" max="1000000" value="100" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 p-3 text-white"></label><label class="block text-xs text-slate-400">Squad size<input id="mp-squad" type="number" min="1" max="30" value="5" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-700 p-3 text-white"></label><button onclick="app.mpCreateRoom()" class="w-full rounded-lg bg-violet-600 hover:bg-violet-500 p-3 text-white font-black">Create room</button></div>
+    <div class="rounded-xl border border-slate-700 p-4 space-y-3"><h3 class="font-black text-white">Join a room</h3><input id="mp-join-name" maxlength="24" placeholder="Your nickname" class="w-full rounded-lg bg-slate-950 border border-slate-700 p-3 text-white"><input id="mp-room-code" maxlength="6" placeholder="6-character room code" class="w-full uppercase rounded-lg bg-slate-950 border border-slate-700 p-3 text-white tracking-widest"><button onclick="app.mpJoinRoom()" class="w-full rounded-lg bg-slate-700 hover:bg-slate-600 p-3 text-white font-black">Join room</button></div>
+   </div>
+   <div id="mp-room-panel" class="hidden space-y-4">
+    <div class="rounded-xl bg-violet-950/50 border border-violet-500/30 p-4 flex flex-wrap items-center justify-between gap-3"><div><div class="text-[10px] uppercase tracking-widest text-violet-300 font-black">Room code · share with friends</div><div id="mp-room-code-display" class="text-3xl font-black tracking-[.2em] text-white"></div></div><button onclick="app.mpCopyCode()" class="px-4 py-2 rounded-lg bg-violet-600 text-white font-bold"><i class="fa-regular fa-copy mr-1"></i> Copy code</button></div>
+    <div class="grid sm:grid-cols-2 gap-3"><div class="rounded-xl bg-slate-800/70 p-3"><div class="text-xs uppercase tracking-widest text-slate-400 font-black mb-2">Players</div><div id="mp-players" class="space-y-2 text-sm text-white"></div></div><div class="rounded-xl bg-slate-800/70 p-3"><div class="text-xs uppercase tracking-widest text-slate-400 font-black mb-2">Room status</div><div id="mp-room-status" class="text-white font-bold">Lobby</div><div id="mp-host-controls" class="mt-3 space-y-2"></div></div></div>
+    <div id="mp-auction" class="hidden rounded-xl border border-amber-500/30 bg-slate-950 p-4 space-y-3"><div class="flex justify-between items-center gap-2"><span class="text-amber-300 text-xs uppercase tracking-widest font-black">Live auction</span><span id="mp-auction-state" class="text-xs text-slate-400"></span></div><div id="mp-character-image" class="max-w-xs mx-auto"></div><div id="mp-character" class="text-xl font-black text-white"></div><div class="text-2xl font-black text-amber-300" id="mp-highest-bid">No bids yet</div><div id="mp-highest-bidder" class="text-xs text-slate-400"></div><div id="mp-bid-controls" class="flex flex-wrap gap-2"><input id="mp-bid-amount" type="number" min="1" step="1" placeholder="Your bid" class="min-w-0 flex-1 rounded-lg bg-slate-900 border border-slate-700 p-3 text-white"><button onclick="app.mpPlaceBid()" class="rounded-lg bg-amber-500 px-4 py-3 font-black text-slate-950">Bid</button><button onclick="app.mpPass()" class="rounded-lg bg-slate-800 px-4 py-3 font-bold text-slate-200">Pass</button></div><div id="mp-host-end" class="hidden"><button onclick="app.mpEndAuction()" class="w-full rounded-lg bg-red-600 hover:bg-red-500 px-4 py-3 text-white font-black">Host: End auction</button></div><div id="mp-auction-next" class="hidden"><button onclick="app.mpNextCharacter()" class="w-full rounded-lg bg-violet-600 hover:bg-violet-500 px-4 py-3 text-white font-black">Host: Start next character</button></div></div>
+    <div class="rounded-xl bg-slate-800/60 p-3"><div class="text-xs uppercase tracking-widest text-slate-400 font-black mb-2">Live rosters</div><div id="mp-rosters" class="space-y-2 text-sm"></div></div>
+    <button onclick="app.mpLeaveRoom()" class="text-xs text-slate-500 underline">Leave this room on this device</button>
+   </div>
+   <div id="mp-message" role="status" class="text-sm text-slate-300" aria-live="polite"></div>
+  </div>
+ </div>
+</div>
+
 </body>
 </html>
