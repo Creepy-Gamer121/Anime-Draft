@@ -538,7 +538,7 @@
         // ---------- CHARACTER POOL + PORTRAITS (names and images come straight from AniList) ----------
         const poolService = {
             api: 'https://graphql.anilist.co',
-            storeKey: 'animeDraftPoolV4',
+            storeKey: 'animeDraftPoolV7',
             ttl: 7 * 24 * 3600 * 1000,
             chain: Promise.resolve(),
             memo: {},
@@ -552,7 +552,8 @@
 
             // Characters with no fighting ability at all (family, healers, staff, bystanders)
             NON_COMBAT: ['ieiri', 'ijichi', 'tsumiki', 'amanai', 'ubuyashiki', 'amane', 'haganezuka', 'kotetsu', 'kanzaki',
-                'sumi', 'kiyo', 'naho', 'kie', 'takeo', 'hanako', 'shigeru', 'rokuta', 'licita', 'lily', 'orsi'],
+                'sumi', 'kiyo', 'naho', 'kie', 'takeo', 'hanako', 'shigeru', 'rokuta', 'licita', 'lily', 'orsi',
+                'wasuke', 'kaori', 'crow', 'crows', 'kasugai', 'karasu', 'chutaro', 'kaburamaru', 'goto', 'kakushi'],
 
             tokens(name) {
                 return name.toLowerCase().replace(/ou/g, 'o').replace(/uu/g, 'u').replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(Boolean);
@@ -560,6 +561,47 @@
 
             isCivilian(name) {
                 return this.tokens(name).some(t => this.NON_COMBAT.includes(t));
+            },
+
+            // Fighters only. A character is kept if any word of its name is on this list
+            // (written in simplified spelling: long vowels like "ou" and "uu" are shortened).
+            FIGHTERS: {
+                jjk: ['gojo', 'sukuna', 'yuji', 'megumi', 'nobara', 'yuta', 'rika', 'maki', 'toji', 'geto', 'kenjaku', 'mahito', 'jogo',
+                    'hanami', 'dagon', 'choso', 'nanami', 'todo', 'hakari', 'kashimo', 'tsukumo', 'higuruma', 'ishigori', 'uro',
+                    'takaba', 'yorozu', 'naoya', 'mei', 'naobito', 'inumaki', 'panda', 'uraume', 'kurorushi', 'smallpox', 'eso',
+                    'kechizu', 'reggie', 'dhruv', 'kusakabe', 'yaga', 'gakuganji', 'utahime', 'mai', 'nanako', 'mimiko', 'miwa',
+                    'kamo', 'nishimiya', 'mechamaru', 'muta', 'ino', 'kurusu', 'kirara', 'ogi', 'jinichi', 'haibara', 'ranta',
+                    'tengen', 'kinji', 'junpei', 'mahoraga', 'rozetsu'],
+                black_clover: ['asta', 'yuno', 'yami', 'julius', 'lucius', 'lucifero', 'beelzebub', 'megicula', 'zagred', 'naamah',
+                    'lilith', 'adrammelech', 'licht', 'lumiere', 'mereoleona', 'noelle', 'nacht', 'fuegoleon', 'nozel', 'vangeance',
+                    'patri', 'zenon', 'dante', 'vanica', 'charlotte', 'rill', 'dorothy', 'jack', 'kaiser', 'charmy', 'luck', 'magna',
+                    'zora', 'secre', 'gadjah', 'finral', 'langris', 'vetto', 'fana', 'rhadodes', 'liebe', 'gauche', 'grey', 'marx',
+                    'klaus', 'mimosa', 'gordon', 'henry', 'kahono', 'kirsch', 'rades', 'nebra', 'solid', 'acier', 'sekke', 'valtos',
+                    'fanzell', 'gueldre', 'kiato', 'raia', 'ladros', 'rhya', 'nero', 'hamon', 'jester', 'catherine', 'sol', 'vice',
+                    'rouchefort', 'mars', 'edward', 'damnatio', 'learch', 'ryuya', 'lotus', 'conrad', 'dominante', 'vermillion'],
+                demon_slayer: ['tanjiro', 'nezuko', 'zenitsu', 'inosuke', 'kanao', 'genya', 'giyu', 'shinobu', 'kocho', 'kyojuro',
+                    'rengoku', 'tengen', 'mitsuri', 'muichiro', 'obanai', 'sanemi', 'gyomei', 'yoriichi', 'muzan', 'kokushibo', 'doma',
+                    'akaza', 'hantengu', 'gyokko', 'gyutaro', 'daki', 'kaigaku', 'nakime', 'enmu', 'rui', 'susamaru', 'yahaba',
+                    'kyogai', 'kanae', 'sabito', 'makomo', 'jigoro', 'urokodaki', 'shinjuro', 'senjuro', 'tamayo', 'yushiro',
+                    'murata', 'zohakuten', 'sekido', 'karaku', 'aizetsu', 'urogi', 'hinatsuru', 'makio', 'suma', 'tomioka',
+                    'kamado', 'agatsuma', 'hashibira', 'tsuyuri', 'shinazugawa', 'himejima', 'iguro', 'tokito', 'uzui', 'kanroji']
+            },
+
+            // True if two words differ by at most one letter (covers spelling variants)
+            close(a, b) {
+                if (Math.abs(a.length - b.length) > 1) return false;
+                let i = 0, j = 0, diff = 0;
+                while (i < a.length && j < b.length) {
+                    if (a[i] === b[j]) { i++; j++; continue; }
+                    if (++diff > 1) return false;
+                    if (a.length > b.length) i++; else if (a.length < b.length) j++; else { i++; j++; }
+                }
+                return diff + (a.length - i) + (b.length - j) <= 1;
+            },
+
+            isFighter(name, animeKey) {
+                const allow = this.FIGHTERS[animeKey] || [];
+                return this.tokens(name).some(t => allow.some(a => a === t || (a.length >= 5 && t.length >= 5 && this.close(a, t))));
             },
 
             QUERY: 'query($id:Int,$page:Int){Media(id:$id,type:ANIME){title{romaji english} characters(page:$page,perPage:25,sort:[FAVOURITES_DESC]){pageInfo{hasNextPage} edges{role node{id name{full} image{large} favourites}}}}}',
@@ -592,7 +634,7 @@
 
             async loadMedia(id, keys) {
                 const out = [];
-                for (let page = 1; page <= 2; page++) {
+                for (let page = 1; page <= 4; page++) {
                     const json = await this.gql({ id, page });
                     const media = json && json.data && json.data.Media;
                     if (!media) break;
@@ -635,7 +677,8 @@
                 }
                 // Most popular first, drop non-fighters, keep the top 60
                 list.sort((a, b) => b.fav - a.fav);
-                const kept = list.filter(c => !this.isCivilian(c.name)).slice(0, 60);
+                const fighters = list.filter(c => this.isFighter(c.name, animeKey) && !this.isCivilian(c.name));
+                const kept = fighters.length >= 15 ? fighters : list.filter(c => !this.isCivilian(c.name)).slice(0, 60);
                 list.length = 0;
                 kept.forEach(c => list.push(c));
 
