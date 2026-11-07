@@ -105,9 +105,9 @@
                 <!-- Anime Category Selector -->
                 <div>
                     <label class="block text-xs font-black text-slate-300 uppercase tracking-wider mb-2.5">
-                        <i class="fa-solid fa-layer-group text-amber-400 mr-1.5"></i> Choose Anime Universe
+                        <i class="fa-solid fa-layer-group text-amber-400 mr-1.5"></i> Choose Anime Universes
                     </label>
-                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                         <div onclick="app.selectAnime('jjk')" id="card-anime-jjk" 
                             class="cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10">
                             <span class="text-3xl mb-1">👁️</span>
@@ -126,7 +126,20 @@
                             <div class="font-extrabold text-xs text-orange-300">Demon Slayer</div>
                             <div class="text-[10px] text-slate-400 mt-0.5">Hashiras & Demons</div>
                         </div>
+                        <div onclick="app.selectAnime('my_hero_academia')" id="card-anime-mha"
+                            class="cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
+                            <span class="text-3xl mb-1">🦸</span>
+                            <div class="font-extrabold text-xs text-green-300">My Hero Academia</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">Heroes & Villains</div>
+                        </div>
+                        <div onclick="app.selectAnime('attack_on_titan')" id="card-anime-aot"
+                            class="cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50 col-span-2 sm:col-span-1">
+                            <span class="text-3xl mb-1">🧱</span>
+                            <div class="font-extrabold text-xs text-sky-300">Attack on Titan</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">Scouts & Titans</div>
+                        </div>
                     </div>
+                    <p id="anime-selected-note" class="text-[10px] text-slate-400 mt-2"></p>
                 </div>
 
                 <!-- Number of Players -->
@@ -538,7 +551,7 @@
         // ---------- CHARACTER POOL + PORTRAITS (names and images come straight from AniList) ----------
         const poolService = {
             api: 'https://graphql.anilist.co',
-            storeKey: 'animeDraftPoolV7',
+            storeKey: 'animeDraftPoolV8',
             ttl: 7 * 24 * 3600 * 1000,
             chain: Promise.resolve(),
             memo: {},
@@ -547,7 +560,9 @@
             MEDIA: {
                 jjk: { ids: [113415, 145064], keys: ['jujutsu'] },
                 black_clover: { ids: [97940], keys: ['black clover'] },
-                demon_slayer: { ids: [101922, 112151, 142329, 145139, 166240], keys: ['kimetsu', 'demon slayer'] }
+                demon_slayer: { ids: [101922, 112151, 142329, 145139, 166240], keys: ['kimetsu', 'demon slayer'] },
+                my_hero_academia: { ids: [21459, 21856, 100166, 104276, 117193, 139630], keys: ['my hero academia', 'boku no hero'] },
+                attack_on_titan: { ids: [16498, 25777, 99147, 104578, 110277, 131681], keys: ['attack on titan', 'shingeki'] }
             },
 
             // Characters with no fighting ability at all (family, healers, staff, bystanders)
@@ -584,7 +599,24 @@
                     'akaza', 'hantengu', 'gyokko', 'gyutaro', 'daki', 'kaigaku', 'nakime', 'enmu', 'rui', 'susamaru', 'yahaba',
                     'kyogai', 'kanae', 'sabito', 'makomo', 'jigoro', 'urokodaki', 'shinjuro', 'senjuro', 'tamayo', 'yushiro',
                     'murata', 'zohakuten', 'sekido', 'karaku', 'aizetsu', 'urogi', 'hinatsuru', 'makio', 'suma', 'tomioka',
-                    'kamado', 'agatsuma', 'hashibira', 'tsuyuri', 'shinazugawa', 'himejima', 'iguro', 'tokito', 'uzui', 'kanroji']
+                    'kamado', 'agatsuma', 'hashibira', 'tsuyuri', 'shinazugawa', 'himejima', 'iguro', 'tokito', 'uzui', 'kanroji'],
+                my_hero_academia: ['izuku', 'midoriya', 'bakugo', 'katsuki', 'todoroki', 'shoto', 'uraraka', 'ochaco', 'iida', 'tenya', 'asui', 'tsuyu',
+                    'kirishima', 'eijiro', 'kaminari', 'denki', 'sero', 'hanta', 'ashido', 'mina', 'jiro', 'kyoka', 'tokoyami', 'fumikage',
+                    'mineta', 'minoru', 'yaoyorozu', 'momo', 'aoyama', 'yuga', 'koda', 'sato', 'rikido', 'ojiro', 'mashirao', 'shoji',
+                    'mezo', 'hagakure', 'toru', 'might', 'toshinori', 'yagi', 'endeavor', 'enji', 'hawks', 'keigo', 'aizawa', 'shota',
+                    'mirio', 'togata', 'tamaki', 'amajiki', 'nejire', 'hado', 'nemuri', 'midnight', 'torino', 'jeanist', 'edgeshot',
+                    'ryukyu', 'shigaraki', 'tomura', 'for', 'kurogiri', 'dabi', 'toga', 'himiko', 'twice', 'spinner', 'compress', 'magne',
+                    'mustard', 'muscular', 'moonfish', 'overhaul', 'chisaki', 'nighteye', 'stain', 'gentle', 'nagant', 'redestro',
+                    'skeptic', 'geten', 'monoma', 'neito', 'kendo', 'itsuka', 'tetsutetsu', 'inasa', 'yoarashi', 'setsuna', 'tokage',
+                    'honenuki', 'shinso', 'hitoshi', 'ibara', 'shiozaki', 'juzo', 'pony', 'tsunotori', 'tsuburaba', 'kosei', 'yui',
+                    'kodai', 'gigantomachia', 'nana', 'shimura', 'bubaigawara'],
+                attack_on_titan: ['eren', 'yeager', 'mikasa', 'ackerman', 'armin', 'arlert', 'levi', 'erwin', 'smith', 'hange', 'zoe', 'jean', 'kirstein', 'connie',
+                    'springer', 'sasha', 'blouse', 'reiner', 'braun', 'bertholdt', 'hoover', 'annie', 'leonhart', 'ymir', 'historia',
+                    'krista', 'zeke', 'pieck', 'porco', 'galliard', 'marcel', 'falco', 'grice', 'gabi', 'braun', 'colt', 'grisha',
+                    'kruger', 'mike', 'zacharias', 'petra', 'oluo', 'eld', 'gunther', 'erd', 'nanaba', 'gelgar', 'dot', 'pixis', 'nile',
+                    'dok', 'marlo', 'hitch', 'floch', 'forster', 'kenny', 'uri', 'reiss', 'rod', 'frieda', 'yelena', 'onyankopon',
+                    'zofia', 'udo', 'thomas', 'mina', 'daz', 'nac', 'mylius', 'samuel', 'marco', 'hannes', 'shadis', 'isabel', 'farlan',
+                    'magath', 'rico', 'boris', 'karl', 'fritz', 'kitz', 'lobov', 'sannes', 'ralph', 'darius']
             },
 
             // True if two words differ by at most one letter (covers spelling variants)
@@ -632,9 +664,9 @@
                 return result;
             },
 
-            async loadMedia(id, keys) {
+            async loadMedia(id, keys, maxPages) {
                 const out = [];
-                for (let page = 1; page <= 4; page++) {
+                for (let page = 1; page <= maxPages; page++) {
                     const json = await this.gql({ id, page });
                     const media = json && json.data && json.data.Media;
                     if (!media) break;
@@ -667,8 +699,9 @@
                 const cfg = this.MEDIA[animeKey];
                 const seen = new Set();
                 const list = [];
-                for (const id of cfg.ids) {
-                    const part = await this.loadMedia(id, cfg.keys);
+                for (const [i, id] of cfg.ids.entries()) {
+                    // main entry: 4 pages; later seasons: just the most popular 25
+                    const part = await this.loadMedia(id, cfg.keys, i === 0 ? 4 : 1);
                     part.forEach(c => {
                         if (!c.name || seen.has(c.id)) return;
                         seen.add(c.id);
@@ -714,6 +747,7 @@
         class App {
             constructor() {
                 this.selectedAnime = 'jjk';
+                this.selectedAnimes = new Set(['jjk']);
                 this.playerCount = 3;
                 this.players = [];
                 this.deck = [];
@@ -722,6 +756,7 @@
 
             init() {
                 this.renderPlayerInputs();
+                this.renderAnimeCards();
             }
 
             showToast(msg) {
@@ -733,18 +768,36 @@
                 }, 2500);
             }
 
+            // Tap a card to add or remove that anime. At least one stays selected.
             selectAnime(animeKey) {
-                this.selectedAnime = animeKey;
-                ['bc', 'ds', 'jjk'].forEach(key => {
-                    const card = document.getElementById(`card-anime-${key}`);
-                    if ((animeKey === 'black_clover' && key === 'bc') ||
-                        (animeKey === 'demon_slayer' && key === 'ds') ||
-                        (animeKey === 'jjk' && key === 'jjk')) {
-                        card.className = "cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10";
-                    } else {
-                        card.className = "cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50";
-                    }
+                const set = this.selectedAnimes;
+                if (set.has(animeKey)) { if (set.size > 1) set.delete(animeKey); }
+                else set.add(animeKey);
+                this.selectedAnime = [...set][0];
+                this.renderAnimeCards();
+            }
+
+            renderAnimeCards() {
+                const cardIds = { jjk: 'jjk', black_clover: 'bc', demon_slayer: 'ds', my_hero_academia: 'mha', attack_on_titan: 'aot' };
+                Object.entries(cardIds).forEach(([key, id]) => {
+                    const card = document.getElementById(`card-anime-${id}`);
+                    const on = this.selectedAnimes.has(key);
+                    card.className = "cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center "
+                        + (on ? "bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10" : "bg-slate-800/40 border-slate-700 hover:border-amber-500/50")
+                        + (key === 'attack_on_titan' ? " col-span-2 sm:col-span-1" : "");
                 });
+                const n = this.selectedAnimes.size;
+                const note = document.getElementById('anime-selected-note');
+                if (note) note.textContent = n === 1 ? '1 anime selected. Tap more to mix them into one deck.' : `${n} anime mixed into one deck.`;
+            }
+
+            titleOf(key) {
+                return { jjk: 'Jujutsu Kaisen', black_clover: 'Black Clover', demon_slayer: 'Demon Slayer',
+                    my_hero_academia: 'My Hero Academia', attack_on_titan: 'Attack on Titan' }[key];
+            }
+
+            selectedTitles() {
+                return [...this.selectedAnimes].map(k => this.titleOf(k));
             }
 
             setPlayerCount(count) {
@@ -790,18 +843,31 @@
                 }
 
                 // Copy & Shuffle Anime Deck
-                // Load the character list from AniList (names and portraits come from there)
+                // Load the character list from AniList for every selected anime
                 const startBtn = document.querySelector('#setup-form button[type="submit"]');
                 const startLabel = startBtn.innerHTML;
                 startBtn.disabled = true;
-                startBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading characters...';
-                let pool = await poolService.load(this.selectedAnime);
+                const keys = [...this.selectedAnimes];
+                let pool = [];
+                let usedBackup = false;
+                for (let i = 0; i < keys.length; i++) {
+                    startBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading ${this.titleOf(keys[i])} (${i + 1}/${keys.length})...`;
+                    let part = await poolService.load(keys[i]);
+                    if (part.length < 15 && ANIME_DATABASE[keys[i]]) {
+                        usedBackup = true;
+                        part = ANIME_DATABASE[keys[i]].map(c => ({ ...c, img: null }));
+                    }
+                    pool = pool.concat(part);
+                }
                 startBtn.disabled = false;
                 startBtn.innerHTML = startLabel;
-                if (pool.length < 15) {
-                    this.showToast("Couldn't reach AniList. Using the built-in list without portraits.");
-                    pool = ANIME_DATABASE[this.selectedAnime].map(c => ({ ...c, img: null }));
+                if (pool.length < 10) {
+                    this.showToast("Couldn't load enough characters. Check your connection and try again.");
+                    return;
                 }
+                if (usedBackup) this.showToast("Couldn't reach AniList for one anime. Using the built-in list without portraits.");
+                const seen = new Set();
+                pool = pool.filter(c => !seen.has(c.id) && seen.add(c.id));
                 this.deck = [...pool].sort(() => Math.random() - 0.5);
 
                 // Screen Switch
@@ -814,7 +880,7 @@
                     demon_slayer: 'Demon Slayer',
                     jjk: 'Jujutsu Kaisen'
                 };
-                document.getElementById('anime-mode-indicator').innerText = animeTitles[this.selectedAnime];
+                document.getElementById('anime-mode-indicator').innerText = this.selectedTitles().join(' + ');
 
                 this.nextAuctionRound();
             }
@@ -1022,7 +1088,7 @@
                     jjk: 'Jujutsu Kaisen'
                 };
 
-                let prompt = `You are an elite Anime Battle Referee & Combat Analyst. We just finished an auction draft in the universe of [${animeNames[this.selectedAnime]}].\n\n`;
+                let prompt = `You are an elite Anime Battle Referee & Combat Analyst. We just finished an auction draft in the universe of [${this.selectedTitles().join(' + ')}].\n\n`;
 
                 this.players.forEach((p, idx) => {
                     prompt += `=== TEAM #${idx + 1}: ${p.name.toUpperCase()} ===\n`;
