@@ -107,30 +107,24 @@
                     <label class="block text-xs font-black text-slate-300 uppercase tracking-wider mb-2.5">
                         <i class="fa-solid fa-layer-group text-amber-400 mr-1.5"></i> Choose Anime Universe
                     </label>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
                         <div onclick="app.selectAnime('jjk')" id="card-anime-jjk" 
-                            class="cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10">
+                            class="cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10">
                             <span class="text-3xl mb-1">👁️</span>
                             <div class="font-extrabold text-xs text-purple-300">Jujutsu Kaisen</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">42 Sorcerers & Curses</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">Sorcerers & Curses</div>
                         </div>
                         <div onclick="app.selectAnime('black_clover')" id="card-anime-bc" 
-                            class="cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
+                            class="cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
                             <span class="text-3xl mb-1">🍀</span>
                             <div class="font-extrabold text-xs text-amber-400">Black Clover</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">40 Knights & Devils</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">Knights & Devils</div>
                         </div>
                         <div onclick="app.selectAnime('demon_slayer')" id="card-anime-ds" 
-                            class="cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
+                            class="cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
                             <span class="text-3xl mb-1">⚔️</span>
                             <div class="font-extrabold text-xs text-orange-300">Demon Slayer</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">38 Hashiras & Demons</div>
-                        </div>
-                        <div onclick="app.selectAnime('chainsaw_man')" id="card-anime-cm" 
-                            class="cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
-                            <span class="text-3xl mb-1">🪚</span>
-                            <div class="font-extrabold text-xs text-red-400">Chainsaw Man</div>
-                            <div class="text-[10px] text-slate-400 mt-0.5">33 Hunters & Devils</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">Hashiras & Demons</div>
                         </div>
                     </div>
                 </div>
@@ -539,205 +533,123 @@
                 { id: 'ds38', name: 'Tamayo & Yushiro' }
             ],
 
-            // CHAINSAW MAN POOL (33 Characters)
-            chainsaw_man: [
-                { id: 'cm1', name: 'Denji' },
-                { id: 'cm2', name: 'Chainsaw Man (Pochita Form)' },
-                { id: 'cm3', name: 'Pochita (Chainsaw Devil)' },
-                { id: 'cm4', name: 'Makima (Control Devil)' },
-                { id: 'cm5', name: 'Power (Blood Fiend)' },
-                { id: 'cm6', name: 'Aki Hayakawa' },
-                { id: 'cm7', name: 'Himeno' },
-                { id: 'cm8', name: 'Masahiko Kishibe' },
-                { id: 'cm9', name: 'Kobeni Higashiyama' },
-                { id: 'cm10', name: 'Angel Devil' },
-                { id: 'cm11', name: 'Reze (Bomb Devil)' },
-                { id: 'cm12', name: 'Quanxi' },
-                { id: 'cm13', name: 'Beam (Shark Fiend)' },
-                { id: 'cm14', name: 'Galgali (Violence Fiend)' },
-                { id: 'cm15', name: 'Santa Claus' },
-                { id: 'cm16', name: 'Tolka' },
-                { id: 'cm17', name: 'Pingzi' },
-                { id: 'cm18', name: 'Katana Man' },
-                { id: 'cm19', name: 'Yoru (War Devil)' },
-                { id: 'cm20', name: 'Asa Mitaka' },
-                { id: 'cm21', name: 'Yoshida Hirofumi' },
-                { id: 'cm22', name: 'Nayuta (Control Devil)' },
-                { id: 'cm23', name: 'Fami (Famine Devil)' },
-                { id: 'cm24', name: 'Falling Devil' },
-                { id: 'cm25', name: 'Gun Devil' },
-                { id: 'cm26', name: 'Darkness Devil' },
-                { id: 'cm27', name: 'Death Devil' },
-                { id: 'cm28', name: 'Eternity Devil' },
-                { id: 'cm29', name: 'Ghost Devil' },
-                { id: 'cm30', name: 'Curse Devil' },
-                { id: 'cm31', name: 'Bat Devil' },
-                { id: 'cm32', name: 'Fox Devil (Kon)' },
-                { id: 'cm33', name: 'Kusakabe' }
-            ]
         };
 
-        // ---------- CHARACTER IMAGES (loaded live from the free AniList API) ----------
-        const ANIME_KEYWORDS = {
-            jjk: ['jujutsu'],
-            black_clover: ['black clover'],
-            demon_slayer: ['kimetsu', 'demon slayer'],
-            chainsaw_man: ['chainsaw']
-        };
-
-        const CHAR_BY_ID = {};
-        Object.values(ANIME_DATABASE).forEach(list => list.forEach(c => { CHAR_BY_ID[c.id] = c; }));
-
-        const imageService = {
+        // ---------- CHARACTER POOL + PORTRAITS (names and images come straight from AniList) ----------
+        const poolService = {
             api: 'https://graphql.anilist.co',
-            storeKey: 'animeDraftImgCacheV2',
-            cache: {},
-            pending: {},
+            storeKey: 'animeDraftPoolV3',
+            ttl: 7 * 24 * 3600 * 1000,
             chain: Promise.resolve(),
-            warned: false,
+            memo: {},
 
-            init() {
-                try { this.cache = JSON.parse(localStorage.getItem(this.storeKey) || '{}'); } catch (e) { this.cache = {}; }
+            // AniList entries for each show. The title check below skips any entry that turns out to be a different show.
+            MEDIA: {
+                jjk: { ids: [113415, 145064], keys: ['jujutsu'] },
+                black_clover: { ids: [97940], keys: ['black clover'] },
+                demon_slayer: { ids: [101922, 112151, 142329, 145139, 166240], keys: ['kimetsu', 'demon slayer'] }
             },
 
-            save() {
-                try { localStorage.setItem(this.storeKey, JSON.stringify(this.cache)); } catch (e) {}
-            },
+            QUERY: 'query($id:Int,$page:Int){Media(id:$id,type:ANIME){title{romaji english} characters(page:$page,perPage:25,sort:[ROLE,FAVOURITES_DESC]){pageInfo{hasNextPage} edges{role node{id name{full} image{large}}}}}}',
 
-            warn(msg) {
-                if (this.warned) return;
-                this.warned = true;
-                try { app.showToast(msg); } catch (e) {}
-            },
-
-            // One shared queue with a gap between calls, so we stay under AniList's rate limit
-            request(search) {
-                const body = JSON.stringify({
-                    query: 'query($s:String){Page(perPage:6){characters(search:$s,sort:FAVOURITES_DESC){name{full} image{large} media(perPage:5){nodes{title{romaji english native}}}}}}',
-                    variables: { s: search }
-                });
+            // One shared queue with a gap between calls to stay under AniList's rate limit
+            gql(variables) {
                 const run = async () => {
                     for (let attempt = 0; attempt < 3; attempt++) {
                         try {
                             const res = await fetch(this.api, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                                body
+                                body: JSON.stringify({ query: this.QUERY, variables })
                             });
                             if (res.status === 429) {
                                 const wait = (parseInt(res.headers.get('Retry-After')) || 5) * 1000;
                                 await new Promise(r => setTimeout(r, wait));
                                 continue;
                             }
-                            if (!res.ok) { this.warn('Portrait service returned an error (' + res.status + ')'); return null; }
-                            const json = await res.json();
-                            return json && json.data && json.data.Page ? json.data.Page.characters : null;
-                        } catch (e) {
-                            this.warn('Could not reach the portrait service');
-                            return null;
-                        }
+                            if (!res.ok) return null;
+                            return await res.json();
+                        } catch (e) { return null; }
                     }
                     return null;
                 };
                 const result = this.chain.then(run);
-                this.chain = result.then(() => new Promise(r => setTimeout(r, 800)));
+                this.chain = result.then(() => new Promise(r => setTimeout(r, 700)));
                 return result;
             },
 
-            tokens(name) {
-                return name.toLowerCase()
-                    .replace(/\(.*?\)/g, ' ')
-                    .replace(/ou/g, 'o').replace(/uu/g, 'u')
-                    .replace(/[^a-z\s]/g, ' ')
-                    .split(/\s+/).filter(Boolean);
+            async loadMedia(id, keys) {
+                const out = [];
+                for (let page = 1; page <= 4; page++) {
+                    const json = await this.gql({ id, page });
+                    const media = json && json.data && json.data.Media;
+                    if (!media) break;
+                    const title = Object.values(media.title || {}).filter(Boolean).join(' ').toLowerCase();
+                    if (!keys.some(k => title.includes(k))) break;
+                    const conn = media.characters || {};
+                    let hitBackground = false;
+                    (conn.edges || []).forEach(e => {
+                        if (e.role === 'BACKGROUND') { hitBackground = true; return; }
+                        const n = e.node;
+                        const img = n && n.image && n.image.large;
+                        if (!n || !img || /default\./.test(img)) return;
+                        out.push({ id: 'al' + n.id, name: ((n.name && n.name.full) || '').replace(/[<>&"]/g, '').trim(), img });
+                    });
+                    if (hitBackground || !(conn.pageInfo && conn.pageInfo.hasNextPage)) break;
+                }
+                return out;
             },
 
-            STOP: ['cursed', 'spirit', 'form', 'the', 'of', 'king', 'supreme', 'leader', 'devils', 'devil', 'fiend', 'upper', 'lower', 'moon', 'deity'],
-            failed: {},
-
-            meaningful(name) {
-                const all = this.tokens(name.split('&')[0]);
-                const kept = all.filter(t => !this.STOP.includes(t));
-                return kept.length ? kept : all;
-            },
-
-            pick(list, name, animeKey) {
-                if (!list || !list.length) return null;
-                const mine = this.meaningful(name);
-                const keys = ANIME_KEYWORDS[animeKey];
-                let best = null, bestScore = -1;
-                list.forEach(c => {
-                    if (!c.image || !c.image.large) return;
-                    const theirs = this.tokens(c.name.full || '');
-                    const inter = mine.filter(t => theirs.includes(t)).length;
-                    if (!inter) return;
-                    const titles = ((c.media && c.media.nodes) || [])
-                        .map(n => Object.values(n.title || {}).filter(Boolean).join(' ').toLowerCase()).join(' ');
-                    const fromShow = keys.some(k => titles.includes(k));
-                    // Accept a hit from the right show, or a full multi-word name match
-                    if (!fromShow && !(mine.length >= 2 && inter === mine.length)) return;
-                    const score = inter + (fromShow ? 10 : 0);
-                    if (score > bestScore) { best = c; bestScore = score; }
-                });
-                return best ? best.image.large : null;
-            },
-
-            // Full name first, then the last word, then the first word (covers spellings like Yuuji / Yuji)
-            queries(name) {
-                const clean = name.split('&')[0].replace(/\(.*?\)/g, '').trim();
-                const words = clean.split(/\s+/).filter(w => w.length > 2 && !this.STOP.includes(w.toLowerCase()));
-                const list = [clean];
-                if (words.length > 1) { list.push(words[words.length - 1]); list.push(words[0]); }
-                return [...new Set(list)];
-            },
-
-            resolve(id) {
-                if (id in this.cache) return Promise.resolve(this.cache[id]);
-                if (this.failed[id]) return Promise.resolve(null);
-                if (this.pending[id]) return this.pending[id];
-                const char = CHAR_BY_ID[id];
-                const animeKey = id.startsWith('jjk') ? 'jjk' : id.startsWith('bc') ? 'black_clover' : id.startsWith('ds') ? 'demon_slayer' : 'chainsaw_man';
-                this.pending[id] = (async () => {
-                    let url = null;
-                    for (const q of this.queries(char.name)) {
-                        const list = await this.request(q);
-                        url = this.pick(list, char.name, animeKey);
-                        if (url) break;
+            async load(animeKey) {
+                if (this.memo[animeKey]) return this.memo[animeKey];
+                try {
+                    const store = JSON.parse(localStorage.getItem(this.storeKey) || '{}');
+                    const hit = store[animeKey];
+                    if (hit && Date.now() - hit.t < this.ttl && hit.list.length >= 15) {
+                        this.memo[animeKey] = hit.list;
+                        return hit.list;
                     }
-                    if (url) { this.cache[id] = url; this.save(); } else { this.failed[id] = true; }
-                    delete this.pending[id];
-                    return url;
-                })();
-                return this.pending[id];
-            },
+                } catch (e) {}
 
+                const cfg = this.MEDIA[animeKey];
+                const seen = new Set();
+                const list = [];
+                for (const id of cfg.ids) {
+                    const part = await this.loadMedia(id, cfg.keys);
+                    part.forEach(c => {
+                        if (!c.name || seen.has(c.id)) return;
+                        seen.add(c.id);
+                        list.push(c);
+                    });
+                }
+                if (list.length >= 15) {
+                    this.memo[animeKey] = list;
+                    try {
+                        const store = JSON.parse(localStorage.getItem(this.storeKey) || '{}');
+                        store[animeKey] = { t: Date.now(), list };
+                        localStorage.setItem(this.storeKey, JSON.stringify(store));
+                    } catch (e) {}
+                }
+                return list;
+            }
+        };
+
+        const imageService = {
             initials(name) {
                 const t = name.replace(/\(.*?\)/g, '').trim().split(/\s+/);
                 return ((t[0] || '?')[0] + (t[1] ? t[1][0] : '')).toUpperCase();
             },
 
-            // Markup for an image slot. Starts with initials, swaps to the portrait once it loads.
+            // Portrait box. The initials sit underneath, so they show if the picture can't load.
             slot(char, sizeClasses, textClasses) {
-                return `<div data-char-img="${char.id}" class="${sizeClasses} flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-700 flex items-center justify-center font-black text-amber-400 ${textClasses}">${this.initials(char.name)}</div>`;
+                const img = char.img
+                    ? `<img src="${char.img}" alt="" referrerpolicy="no-referrer" loading="lazy" class="absolute inset-0 w-full h-full object-cover object-top" onerror="this.remove()">`
+                    : '';
+                return `<div class="${sizeClasses} relative flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-700 flex items-center justify-center font-black text-amber-400 ${textClasses}">${this.initials(char.name)}${img}</div>`;
             },
 
-            hydrate(root = document) {
-                root.querySelectorAll('[data-char-img]').forEach(el => {
-                    if (el.dataset.done) return;
-                    el.dataset.done = '1';
-                    this.resolve(el.dataset.charImg).then(url => {
-                        if (!url || !el.isConnected) return;
-                        const img = new Image();
-                        img.referrerPolicy = 'no-referrer';
-                        img.className = 'w-full h-full object-cover object-top';
-                        img.alt = CHAR_BY_ID[el.dataset.charImg].name;
-                        img.onload = () => { el.textContent = ''; el.appendChild(img); };
-                        img.src = url;
-                    });
-                });
-            }
+            hydrate() {}
         };
-        imageService.init();
 
         class App {
             constructor() {
@@ -763,15 +675,14 @@
 
             selectAnime(animeKey) {
                 this.selectedAnime = animeKey;
-                ['bc', 'ds', 'jjk', 'cm'].forEach(key => {
+                ['bc', 'ds', 'jjk'].forEach(key => {
                     const card = document.getElementById(`card-anime-${key}`);
                     if ((animeKey === 'black_clover' && key === 'bc') ||
                         (animeKey === 'demon_slayer' && key === 'ds') ||
-                        (animeKey === 'jjk' && key === 'jjk') ||
-                        (animeKey === 'chainsaw_man' && key === 'cm')) {
-                        card.className = "cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10";
+                        (animeKey === 'jjk' && key === 'jjk')) {
+                        card.className = "cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10";
                     } else {
-                        card.className = "cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50";
+                        card.className = "cursor-pointer p-2 sm:p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50";
                     }
                 });
             }
@@ -802,7 +713,7 @@
                 container.innerHTML = html;
             }
 
-            startDraft(e) {
+            async startDraft(e) {
                 e.preventDefault();
                 audioManager.init();
 
@@ -819,7 +730,19 @@
                 }
 
                 // Copy & Shuffle Anime Deck
-                this.deck = [...ANIME_DATABASE[this.selectedAnime]].sort(() => Math.random() - 0.5);
+                // Load the character list from AniList (names and portraits come from there)
+                const startBtn = document.querySelector('#setup-form button[type="submit"]');
+                const startLabel = startBtn.innerHTML;
+                startBtn.disabled = true;
+                startBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading characters...';
+                let pool = await poolService.load(this.selectedAnime);
+                startBtn.disabled = false;
+                startBtn.innerHTML = startLabel;
+                if (pool.length < 15) {
+                    this.showToast("Couldn't reach AniList. Using the built-in list without portraits.");
+                    pool = ANIME_DATABASE[this.selectedAnime].map(c => ({ ...c, img: null }));
+                }
+                this.deck = [...pool].sort(() => Math.random() - 0.5);
 
                 // Screen Switch
                 document.getElementById('setup-screen').classList.add('hidden');
@@ -829,8 +752,7 @@
                 const animeTitles = {
                     black_clover: 'Black Clover',
                     demon_slayer: 'Demon Slayer',
-                    jjk: 'Jujutsu Kaisen',
-                    chainsaw_man: 'Chainsaw Man'
+                    jjk: 'Jujutsu Kaisen'
                 };
                 document.getElementById('anime-mode-indicator').innerText = animeTitles[this.selectedAnime];
 
@@ -850,10 +772,6 @@
                 this.renderStageCard();
                 this.renderRosters();
                 this.updateHostControls();
-
-                // Load portraits for what's on screen, then warm up the next few cards
-                imageService.hydrate();
-                this.deck.slice(-3).forEach(c => imageService.resolve(c.id));
 
                 document.getElementById('host-bid-input').value = '';
 
@@ -1041,8 +959,7 @@
                 const animeNames = {
                     black_clover: 'Black Clover',
                     demon_slayer: 'Demon Slayer',
-                    jjk: 'Jujutsu Kaisen',
-                    chainsaw_man: 'Chainsaw Man'
+                    jjk: 'Jujutsu Kaisen'
                 };
 
                 let prompt = `You are an elite Anime Battle Referee & Combat Analyst. We just finished an auction draft in the universe of [${animeNames[this.selectedAnime]}].\n\n`;
