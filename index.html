@@ -334,6 +334,37 @@
             .anime-card.wide { min-height: 142px; }
         }
 
+
+/* Restore the original anime selector logos and labels on every screen size. */
+.anime-card {
+    min-height: 100px !important;
+    padding: 14px 42px 14px 16px !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    background-size: cover !important;
+    background-position: center 42% !important;
+}
+.anime-card::before {
+    background: linear-gradient(90deg, rgba(5,5,13,.93) 0%, rgba(5,5,13,.78) 48%, rgba(5,5,13,.28) 100%) !important;
+}
+.anime-card .emblem {
+    display: grid !important;
+    flex: 0 0 48px !important;
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 20px !important;
+}
+.anime-card .name { display: block !important; font-size: 14px !important; }
+.anime-card .sub { display: block !important; font-size: 11px !important; }
+.anime-card.wide { min-height: 100px !important; }
+@media (max-width: 767px) {
+    .anime-card { min-height: 100px !important; padding: 12px 36px 12px 12px !important; }
+    .anime-card .emblem { flex-basis: 42px !important; width: 42px !important; height: 42px !important; font-size: 18px !important; }
+    .anime-card .name { font-size: 13px !important; }
+    .anime-card .sub { font-size: 10px !important; }
+    .anime-card.wide { min-height: 100px !important; }
+}
+
 </style>
 
 <style id="anime-home-themes">
