@@ -538,7 +538,7 @@
         // ---------- CHARACTER POOL + PORTRAITS (names and images come straight from AniList) ----------
         const poolService = {
             api: 'https://graphql.anilist.co',
-            storeKey: 'animeDraftPoolV3',
+            storeKey: 'animeDraftPoolV4',
             ttl: 7 * 24 * 3600 * 1000,
             chain: Promise.resolve(),
             memo: {},
@@ -550,7 +550,19 @@
                 demon_slayer: { ids: [101922, 112151, 142329, 145139, 166240], keys: ['kimetsu', 'demon slayer'] }
             },
 
-            QUERY: 'query($id:Int,$page:Int){Media(id:$id,type:ANIME){title{romaji english} characters(page:$page,perPage:25,sort:[ROLE,FAVOURITES_DESC]){pageInfo{hasNextPage} edges{role node{id name{full} image{large}}}}}}',
+            // Characters with no fighting ability at all (family, healers, staff, bystanders)
+            NON_COMBAT: ['ieiri', 'ijichi', 'tsumiki', 'amanai', 'ubuyashiki', 'amane', 'haganezuka', 'kotetsu', 'kanzaki',
+                'sumi', 'kiyo', 'naho', 'kie', 'takeo', 'hanako', 'shigeru', 'rokuta', 'licita', 'lily', 'orsi'],
+
+            tokens(name) {
+                return name.toLowerCase().replace(/ou/g, 'o').replace(/uu/g, 'u').replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(Boolean);
+            },
+
+            isCivilian(name) {
+                return this.tokens(name).some(t => this.NON_COMBAT.includes(t));
+            },
+
+            QUERY: 'query($id:Int,$page:Int){Media(id:$id,type:ANIME){title{romaji english} characters(page:$page,perPage:25,sort:[FAVOURITES_DESC]){pageInfo{hasNextPage} edges{role node{id name{full} image{large} favourites}}}}}',
 
             // One shared queue with a gap between calls to stay under AniList's rate limit
             gql(variables) {
@@ -580,22 +592,21 @@
 
             async loadMedia(id, keys) {
                 const out = [];
-                for (let page = 1; page <= 4; page++) {
+                for (let page = 1; page <= 2; page++) {
                     const json = await this.gql({ id, page });
                     const media = json && json.data && json.data.Media;
                     if (!media) break;
                     const title = Object.values(media.title || {}).filter(Boolean).join(' ').toLowerCase();
                     if (!keys.some(k => title.includes(k))) break;
                     const conn = media.characters || {};
-                    let hitBackground = false;
-                    (conn.edges || []).forEach(e => {
-                        if (e.role === 'BACKGROUND') { hitBackground = true; return; }
+                                        (conn.edges || []).forEach(e => {
+                        if (e.role === 'BACKGROUND') return;
                         const n = e.node;
                         const img = n && n.image && n.image.large;
                         if (!n || !img || /default\./.test(img)) return;
-                        out.push({ id: 'al' + n.id, name: ((n.name && n.name.full) || '').replace(/[<>&"]/g, '').trim(), img });
+                        out.push({ id: 'al' + n.id, name: ((n.name && n.name.full) || '').replace(/[<>&"]/g, '').trim(), img, fav: n.favourites || 0 });
                     });
-                    if (hitBackground || !(conn.pageInfo && conn.pageInfo.hasNextPage)) break;
+                    if (!(conn.pageInfo && conn.pageInfo.hasNextPage)) break;
                 }
                 return out;
             },
@@ -622,6 +633,12 @@
                         list.push(c);
                     });
                 }
+                // Most popular first, drop non-fighters, keep the top 60
+                list.sort((a, b) => b.fav - a.fav);
+                const kept = list.filter(c => !this.isCivilian(c.name)).slice(0, 60);
+                list.length = 0;
+                kept.forEach(c => list.push(c));
+
                 if (list.length >= 15) {
                     this.memo[animeKey] = list;
                     try {
