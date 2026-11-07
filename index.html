@@ -335,34 +335,26 @@
         }
 
 
-/* Restore the original anime selector logos and labels on every screen size. */
+/* Artwork-only anime universe cards: remove labels and emblems so the original artwork is clear. */
 .anime-card {
-    min-height: 100px !important;
-    padding: 14px 42px 14px 16px !important;
-    justify-content: flex-start !important;
-    align-items: center !important;
+    min-height: 132px !important;
+    padding: 10px 38px 10px 10px !important;
+    justify-content: flex-end !important;
+    align-items: stretch !important;
     background-size: cover !important;
-    background-position: center 42% !important;
+    background-position: center center !important;
 }
 .anime-card::before {
-    background: linear-gradient(90deg, rgba(5,5,13,.93) 0%, rgba(5,5,13,.78) 48%, rgba(5,5,13,.28) 100%) !important;
+    background: linear-gradient(180deg, rgba(5,5,13,.02) 0%, rgba(5,5,13,.08) 55%, rgba(5,5,13,.25) 100%) !important;
 }
-.anime-card .emblem {
-    display: grid !important;
-    flex: 0 0 48px !important;
-    width: 48px !important;
-    height: 48px !important;
-    font-size: 20px !important;
-}
-.anime-card .name { display: block !important; font-size: 14px !important; }
-.anime-card .sub { display: block !important; font-size: 11px !important; }
-.anime-card.wide { min-height: 100px !important; }
+.anime-card .emblem,
+.anime-card .name,
+.anime-card .sub { display: none !important; }
+.anime-card .tick { top: 9px; right: 9px; }
+.anime-card.wide { min-height: 142px !important; }
 @media (max-width: 767px) {
-    .anime-card { min-height: 100px !important; padding: 12px 36px 12px 12px !important; }
-    .anime-card .emblem { flex-basis: 42px !important; width: 42px !important; height: 42px !important; font-size: 18px !important; }
-    .anime-card .name { font-size: 13px !important; }
-    .anime-card .sub { font-size: 10px !important; }
-    .anime-card.wide { min-height: 100px !important; }
+    .anime-card { min-height: 132px !important; padding: 10px 38px 10px 10px !important; }
+    .anime-card.wide { min-height: 142px !important; }
 }
 
 </style>
@@ -1880,6 +1872,7 @@ button { -webkit-tap-highlight-color: transparent; }
                   .on('postgres_changes',{event:'*',schema:'public',table:'auctions',filter:'room_id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
                   .on('postgres_changes',{event:'*',schema:'public',table:'bids',filter:'room_id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
                   .on('postgres_changes',{event:'*',schema:'public',table:'roster_entries',filter:'room_id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
+                  .on('postgres_changes',{event:'*',schema:'public',table:'ai_battle_results',filter:'room_id=eq.'+this.mpRoomId},()=>this.mpRefreshRoom())
                   .subscribe();
                 await this.mpRefreshRoom();
             }
@@ -1897,6 +1890,25 @@ button { -webkit-tap-highlight-color: transparent; }
                     this.mpRoom=roomRes.data; this.mpMembers=membersRes.data||[]; this.mpRoster=rosterRes.data||[]; this.mpUserId=userRes.data.user?.id;
                     this.mpAuction=auctionRes.data?.[0]||null;
                     const host=this.mpRoom.host_user_id===this.mpUserId;
+                    if (host && this.mpRoom.status==='active' && !this.mpAuction?.status?.includes('open')) {
+                      const {data:allFull,error:completeError}=await this.mpClient.rpc('host_finish_if_all_teams_full',{p_room_id:this.mpRoomId});
+                      if (!completeError && allFull) this.mpRoom.status='finished';
+                    }
+                    // Remember auctions observed open; when the final pass closes one, the host advances automatically.
+                    this.mpObservedOpenAuctions ||= new Set();
+                    this.mpAutoAdvanceInProgress ||= false;
+                    if (this.mpAuction?.status === 'open') this.mpObservedOpenAuctions.add(this.mpAuction.id);
+                    else if (host && this.mpRoom.status === 'active' && this.mpAuction?.auto_ended === true && this.mpObservedOpenAuctions.has(this.mpAuction.id) && !this.mpAutoAdvanceInProgress) {
+                      this.mpObservedOpenAuctions.delete(this.mpAuction.id);
+                      this.mpAutoAdvanceInProgress = true;
+                      setTimeout(async () => {
+                        try {
+                          const remaining = Array.isArray(this.mpRoom?.character_queue) ? this.mpRoom.character_queue.length : 0;
+                          if (remaining > 0) { this.mpMessage('Everyone is done — winner recorded. Loading next character…'); await this.mpNextCharacter(); }
+                          else this.mpMessage('Draft queue complete! All characters have been auctioned.');
+                        } finally { this.mpAutoAdvanceInProgress = false; }
+                      }, 250);
+                    }
                     document.getElementById('mp-room-status').textContent=this.mpRoom.status.toUpperCase()+(host?' · YOU ARE HOST':'');
                     document.getElementById('mp-players').innerHTML=this.mpMembers.map(m=>`<div class="flex justify-between gap-2"><span>${this.mpEscape(m.nickname)} ${m.is_host?'(Host)':''}</span><span class="text-slate-400">$${Number(m.budget).toFixed(0)}</span></div>`).join('');
                     const hostControls=document.getElementById('mp-host-controls');
@@ -1915,6 +1927,15 @@ button { -webkit-tap-highlight-color: transparent; }
                     } else auctionBox.classList.add('hidden');
                     const rosters=document.getElementById('mp-rosters');
                     rosters.innerHTML=this.mpMembers.map(m=>{const rows=this.mpRoster.filter(r=>r.member_user_id===m.user_id); const spent=rows.reduce((a,r)=>a+Number(r.price),0);return `<div class="rounded-lg bg-slate-900 p-2"><div class="flex justify-between"><b>${this.mpEscape(m.nickname)}</b><span class="text-amber-300">$${(Number(m.budget)-spent).toFixed(0)} left</span></div><div class="text-slate-400 text-xs">${rows.length}/${m.squad_limit} characters</div><div class="text-xs text-slate-300">${rows.map(r=>this.mpEscape(r.character_data?.name||r.character_id)+' ($'+Number(r.price)+')').join(' · ')||'No characters yet'}</div></div>`}).join('');
+                    const results=document.getElementById('mp-results');
+                    if(results) {
+                      results.classList.toggle('hidden',this.mpRoom.status!=='finished');
+                      if(this.mpRoom.status==='finished') {
+                        const {data:stored}=await this.mpClient.from('ai_battle_results').select('result').eq('room_id',this.mpRoomId).maybeSingle();
+                        if(stored?.result) this.mpRenderBattleResult(stored.result);
+                        else if(host && !this.mpRefereeAutoStarted) { this.mpRefereeAutoStarted=true; this.mpRunBattleReferee(); }
+                      }
+                    }
                 } catch(e){this.mpMessage(e.message||'Could not refresh room state.');}
             }
             mpEscape(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -1932,9 +1953,54 @@ button { -webkit-tap-highlight-color: transparent; }
                 }catch(e){this.mpMessage(e.message||'Could not start next auction.');}
             }
             async mpPlaceBid(){try{const amount=Number(document.getElementById('mp-bid-amount').value);const {error}=await this.mpClient.rpc('place_draft_bid',{p_auction_id:this.mpAuction.id,p_amount:amount});if(error)throw error;document.getElementById('mp-bid-amount').value='';await this.mpRefreshRoom();}catch(e){this.mpMessage(e.message||'Bid failed.');}}
-            async mpPass(){try{const {error}=await this.mpClient.rpc('pass_draft_character',{p_auction_id:this.mpAuction.id});if(error)throw error;this.mpMessage('Passed permanently on this character.');}catch(e){this.mpMessage(e.message||'Could not pass.');}}
+            async mpPass(){try{const {error}=await this.mpClient.rpc('pass_draft_character',{p_auction_id:this.mpAuction.id});if(error)throw error;this.mpMessage('Passed permanently. The auction will close automatically when everyone else is done.');}catch(e){this.mpMessage(e.message||'Could not pass.');}}
             async mpEndAuction(){try{const {data,error}=await this.mpClient.rpc('host_end_draft_auction',{p_auction_id:this.mpAuction.id});if(error)throw error;this.mpMessage(data.result==='sold'?'Auction ended and winner recorded.':'No bids — character marked unsold.');await this.mpRefreshRoom();}catch(e){this.mpMessage(e.message||'Could not end auction.');}}
-            async mpSetStatus(status){try{const {error}=await this.mpClient.rpc('host_set_draft_room_status',{p_room_id:this.mpRoomId,p_status:status});if(error)throw error;await this.mpRefreshRoom();}catch(e){this.mpMessage(e.message||'Could not update room.');}}
+            async mpSetStatus(status){try{
+              if(status==='finished' && this.mpAuction?.status==='open') {
+                await this.mpEndAuction();
+              }
+              const {error}=await this.mpClient.rpc('host_set_draft_room_status',{p_room_id:this.mpRoomId,p_status:status});
+              if(error)throw error;
+              await this.mpRefreshRoom();
+              if(status==='finished') this.mpMessage('Draft finished. Your team results are ready below.');
+            }catch(e){this.mpMessage(e.message||'Could not update room.');}}
+            mpBuildBattlePrompt(){
+              let prompt='You are an expert anime battle referee. Evaluate these completed fantasy draft teams using canon feats, strongest demonstrated forms, abilities, speed, durability, teamwork, counters and tactical synergy. Assume neutral battlefield and standard character motivations. Explain assumptions, simulate matchups, then rank every team and name a champion.\n\n';
+              this.mpMembers.forEach((m,i)=>{
+                const rows=this.mpRoster.filter(r=>r.member_user_id===m.user_id);
+                prompt+=`TEAM ${i+1}: ${m.nickname}\\n`;
+                rows.forEach((r,j)=>{prompt+=`${j+1}. ${r.character_data?.name||r.character_id} (draft price $${Number(r.price)})\\n`;});
+                prompt+='\\n';
+              });
+              prompt+='Give a clear 1st-to-last ranking, explain decisive matchups, team synergy, weaknesses, and why the champion wins. Do not treat draft price as combat power.';
+              return prompt;
+            }
+            mpRenderBattleResult(result){
+              const panel=document.getElementById('mp-ai-result'); if(!panel||!result)return;
+              const rows=(result.rankings||[]).slice().sort((a,b)=>a.rank-b.rank);
+              panel.innerHTML=`<div class="rounded-xl border border-amber-400/30 bg-slate-950 p-3 space-y-2"><div class="text-amber-300 font-black">🏆 Champion: ${this.mpEscape(result.champion)}</div><p class="text-sm text-slate-200">${this.mpEscape(result.summary)}</p><div class="space-y-2">${rows.map(r=>`<div class="flex items-start justify-between gap-3 border-t border-slate-800 pt-2"><div><b class="text-white">#${Number(r.rank)} ${this.mpEscape(r.nickname)}</b><div class="text-xs text-slate-400">${this.mpEscape(r.verdict)}</div></div><span class="text-amber-300 font-black">${Number(r.score)}/100</span></div>`).join('')}</div><p class="text-[10px] text-slate-500">AI-generated fictional battle simulation, not an objective canon result.</p></div>`;
+              panel.classList.remove('hidden');
+            }
+            async mpRunBattleReferee(){
+              const btn=document.getElementById('mp-run-referee'); if(btn){btn.disabled=true;btn.textContent='Simulating battles…';}
+              this.mpMessage('The AI referee is comparing every team. This may take a little while…');
+              try{
+                const {data,error}=await this.mpClient.functions.invoke('ai-battle-referee',{body:{room_id:this.mpRoomId}});
+                if(error) throw error;
+                if(data?.error) throw new Error(data.error);
+                this.mpRenderBattleResult(data.result);
+                this.mpMessage(data.cached?'Showing the saved AI referee result.':'Battle simulation complete! Results saved for everyone in the room.');
+              }catch(e){this.mpMessage(e.message||'The AI referee could not judge this draft.');}
+              finally{if(btn){btn.disabled=false;btn.textContent='Run AI Battle Referee';}}
+            }
+            async mpCopyBattlePrompt(){
+              const prompt=this.mpBuildBattlePrompt();
+              try{
+                if(navigator.clipboard?.writeText) await navigator.clipboard.writeText(prompt);
+                else {const ta=document.createElement('textarea');ta.value=prompt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();}
+                this.mpMessage('AI Battle Referee prompt copied. Paste it into ChatGPT or another AI.');
+              }catch(e){this.mpMessage('Could not copy automatically. '+prompt.slice(0,180));}
+            }
             mpCopyCode(){if(this.mpRoomCode)navigator.clipboard?.writeText(this.mpRoomCode).then(()=>this.mpMessage('Room code copied.')).catch(()=>this.mpMessage('Room code: '+this.mpRoomCode));}
             async mpLeaveRoom(){if(this.mpChannel)await this.mpClient.removeChannel(this.mpChannel);this.mpChannel=null;this.mpRoomId=null;this.mpRoom=null;this.mpAuction=null;try{localStorage.removeItem('animeDraftArenaMultiplayerRoomV1');}catch(e){}document.getElementById('mp-room-panel').classList.add('hidden');document.getElementById('mp-lobby-controls').classList.remove('hidden');this.mpMessage('You left the room on this device.');}
         }
@@ -1955,8 +2021,16 @@ button { -webkit-tap-highlight-color: transparent; }
    <div id="mp-room-panel" class="hidden space-y-4">
     <div class="rounded-xl bg-violet-950/50 border border-violet-500/30 p-4 flex flex-wrap items-center justify-between gap-3"><div><div class="text-[10px] uppercase tracking-widest text-violet-300 font-black">Room code · share with friends</div><div id="mp-room-code-display" class="text-3xl font-black tracking-[.2em] text-white"></div></div><button onclick="app.mpCopyCode()" class="px-4 py-2 rounded-lg bg-violet-600 text-white font-bold"><i class="fa-regular fa-copy mr-1"></i> Copy code</button></div>
     <div class="grid sm:grid-cols-2 gap-3"><div class="rounded-xl bg-slate-800/70 p-3"><div class="text-xs uppercase tracking-widest text-slate-400 font-black mb-2">Players</div><div id="mp-players" class="space-y-2 text-sm text-white"></div></div><div class="rounded-xl bg-slate-800/70 p-3"><div class="text-xs uppercase tracking-widest text-slate-400 font-black mb-2">Room status</div><div id="mp-room-status" class="text-white font-bold">Lobby</div><div id="mp-host-controls" class="mt-3 space-y-2"></div></div></div>
-    <div id="mp-auction" class="hidden rounded-xl border border-amber-500/30 bg-slate-950 p-4 space-y-3"><div class="flex justify-between items-center gap-2"><span class="text-amber-300 text-xs uppercase tracking-widest font-black">Live auction</span><span id="mp-auction-state" class="text-xs text-slate-400"></span></div><div id="mp-character-image" class="max-w-xs mx-auto"></div><div id="mp-character" class="text-xl font-black text-white"></div><div class="text-2xl font-black text-amber-300" id="mp-highest-bid">No bids yet</div><div id="mp-highest-bidder" class="text-xs text-slate-400"></div><div id="mp-bid-controls" class="flex flex-wrap gap-2"><input id="mp-bid-amount" type="number" min="1" step="1" placeholder="Your bid" class="min-w-0 flex-1 rounded-lg bg-slate-900 border border-slate-700 p-3 text-white"><button onclick="app.mpPlaceBid()" class="rounded-lg bg-amber-500 px-4 py-3 font-black text-slate-950">Bid</button><button onclick="app.mpPass()" class="rounded-lg bg-slate-800 px-4 py-3 font-bold text-slate-200">Pass</button></div><div id="mp-host-end" class="hidden"><button onclick="app.mpEndAuction()" class="w-full rounded-lg bg-red-600 hover:bg-red-500 px-4 py-3 text-white font-black">Host: End auction</button></div><div id="mp-auction-next" class="hidden"><button onclick="app.mpNextCharacter()" class="w-full rounded-lg bg-violet-600 hover:bg-violet-500 px-4 py-3 text-white font-black">Host: Start next character</button></div></div>
+    <div id="mp-auction" class="hidden rounded-xl border border-amber-500/30 bg-slate-950 p-4 space-y-3"><div class="flex justify-between items-center gap-2"><span class="text-amber-300 text-xs uppercase tracking-widest font-black">Live auction</span><span id="mp-auction-state" class="text-xs text-slate-400"></span></div><div id="mp-character-image" class="max-w-xs mx-auto"></div><div id="mp-character" class="text-xl font-black text-white"></div><div class="text-2xl font-black text-amber-300" id="mp-highest-bid">No bids yet</div><div id="mp-highest-bidder" class="text-xs text-slate-400"></div><div id="mp-bid-controls" class="flex flex-wrap gap-2"><input id="mp-bid-amount" type="number" min="1" step="1" placeholder="Your bid" class="min-w-0 flex-1 rounded-lg bg-slate-900 border border-slate-700 p-3 text-white"><button onclick="app.mpPlaceBid()" class="rounded-lg bg-amber-500 px-4 py-3 font-black text-slate-950">Bid</button><button onclick="app.mpPass()" class="rounded-lg bg-slate-800 px-4 py-3 font-bold text-slate-200">Pass</button></div><div id="mp-host-end" class="hidden"><button onclick="app.mpEndAuction()" class="w-full rounded-lg bg-red-600 hover:bg-red-500 px-4 py-3 text-white font-black">Host: End now (optional)</button></div><div id="mp-auction-next" class="hidden"><button onclick="app.mpNextCharacter()" class="w-full rounded-lg bg-violet-600 hover:bg-violet-500 px-4 py-3 text-white font-black">Host: Start next character</button></div></div>
     <div class="rounded-xl bg-slate-800/60 p-3"><div class="text-xs uppercase tracking-widest text-slate-400 font-black mb-2">Live rosters</div><div id="mp-rosters" class="space-y-2 text-sm"></div></div>
+    <div id="mp-results" class="hidden rounded-xl border border-amber-400/40 bg-slate-900 p-4 space-y-3">
+      <div class="text-amber-300 font-black text-lg">Draft complete!</div>
+      <p class="text-sm text-slate-300">The draft is over. The AI referee will simulate the team battles and announce the champion.</p>
+      <button id="mp-run-referee" onclick="app.mpRunBattleReferee()" class="w-full rounded-lg bg-amber-400 p-3 font-black text-slate-950">Run AI Battle Referee</button>
+      <div id="mp-ai-result" class="hidden"></div>
+      <button onclick="app.mpCopyBattlePrompt()" class="w-full rounded-lg bg-slate-700 p-3 text-sm font-bold text-white">Copy prompt instead</button>
+      <p class="text-xs text-slate-500">The result is saved in the room so every player can see the same rankings.</p>
+    </div>
     <button onclick="app.mpLeaveRoom()" class="text-xs text-slate-500 underline">Leave this room on this device</button>
    </div>
    <div id="mp-message" role="status" class="text-sm text-slate-300" aria-live="polite"></div>
