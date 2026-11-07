@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Draft Arena</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030712;
+            color: #f3f4f6;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030712;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #eab308;
+        }
+
+        @keyframes cardSlide {
+            0% { transform: scale(0.92) translateY(10px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .animate-card-slide {
+            animation: cardSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .glow-amber {
+            box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.25);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- HEADER -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="app.confirmReset()">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-wider uppercase bg-gradient-to-r from-amber-400 via-orange-300 to-amber-200 bg-clip-text text-transparent">ANIME DRAFT ARENA</h1>
+                    <p class="text-[10px] text-slate-400 -mt-1 font-bold tracking-widest uppercase">ULTIMATE AUCTION DRAFT</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button id="sound-toggle" onclick="audioManager.toggleMute()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-700" title="Toggle Sound">
+                    <i id="sound-icon" class="fa-solid fa-volume-high text-amber-400"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none px-4 py-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs shadow-2xl flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-sm"></i>
+        <span id="toast-msg">Notification</span>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col justify-center">
+
+        <!-- ==================== 1. SETUP SCREEN ==================== -->
+        <section id="setup-screen" class="max-w-2xl mx-auto w-full bg-slate-900/95 border border-slate-800 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md my-auto">
+            <div class="text-center mb-8">
+                <span class="inline-block px-3 py-1 bg-amber-500/10 text-amber-400 text-xs font-extrabold rounded-full border border-amber-500/30 uppercase tracking-widest mb-2">
+                    Draft Setup Console
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black text-white tracking-tight">Configure Anime Draft</h2>
+                <p class="text-slate-400 text-xs mt-1.5">Pick your anime universe and set player squad parameters!</p>
+            </div>
+
+            <form id="setup-form" onsubmit="app.startDraft(event)" class="space-y-6">
+                
+                <!-- Anime Category Selector -->
+                <div>
+                    <label class="block text-xs font-black text-slate-300 uppercase tracking-wider mb-2.5">
+                        <i class="fa-solid fa-layer-group text-amber-400 mr-1.5"></i> Choose Anime Universe
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div onclick="app.selectAnime('jjk')" id="card-anime-jjk" 
+                            class="cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10">
+                            <span class="text-3xl mb-1">👁️</span>
+                            <div class="font-extrabold text-xs text-purple-300">Jujutsu Kaisen</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">42 Sorcerers & Curses</div>
+                        </div>
+                        <div onclick="app.selectAnime('black_clover')" id="card-anime-bc" 
+                            class="cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
+                            <span class="text-3xl mb-1">🍀</span>
+                            <div class="font-extrabold text-xs text-amber-400">Black Clover</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">40 Knights & Devils</div>
+                        </div>
+                        <div onclick="app.selectAnime('demon_slayer')" id="card-anime-ds" 
+                            class="cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
+                            <span class="text-3xl mb-1">⚔️</span>
+                            <div class="font-extrabold text-xs text-orange-300">Demon Slayer</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">38 Hashiras & Demons</div>
+                        </div>
+                        <div onclick="app.selectAnime('chainsaw_man')" id="card-anime-cm" 
+                            class="cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50">
+                            <span class="text-3xl mb-1">🪚</span>
+                            <div class="font-extrabold text-xs text-red-400">Chainsaw Man</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">33 Hunters & Devils</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Number of Players -->
+                <div>
+                    <label class="block text-xs font-black text-slate-300 uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-users text-amber-400 mr-1.5"></i> Number of Players (2 - 4)
+                    </label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button type="button" onclick="app.setPlayerCount(2)" id="btn-count-2" class="py-2.5 bg-slate-800 border border-slate-700 font-bold rounded-xl text-xs hover:border-amber-400">2 Players</button>
+                        <button type="button" onclick="app.setPlayerCount(3)" id="btn-count-3" class="py-2.5 bg-amber-500 text-slate-950 font-black rounded-xl text-xs border border-amber-400">3 Players</button>
+                        <button type="button" onclick="app.setPlayerCount(4)" id="btn-count-4" class="py-2.5 bg-slate-800 border border-slate-700 font-bold rounded-xl text-xs hover:border-amber-400">4 Players</button>
+                    </div>
+                </div>
+
+                <!-- Player Names Inputs -->
+                <div>
+                    <label class="block text-xs font-black text-slate-300 uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-user-gear text-amber-400 mr-1.5"></i> Player Names
+                    </label>
+                    <div id="player-inputs-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Live Dynamic Config Summary -->
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Starting Budget</span>
+                        <strong class="text-amber-400 font-mono text-sm">$100 / Player</strong>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">$0 Balance Rule</span>
+                        <span class="px-2 py-0.5 bg-amber-950 text-amber-400 rounded text-[10px] font-bold border border-amber-800/50">FREE CLAIM ACTIVE</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-400 block text-[10px] uppercase font-bold">Target Squad Size</span>
+                        <strong class="text-orange-300 font-mono text-sm">5 Characters</strong>
+                    </div>
+                </div>
+
+                <!-- Start Draft Button -->
+                <button type="submit" class="w-full py-4 bg-gradient-to-r from-amber-500 via-orange-400 to-amber-400 text-slate-950 font-black text-lg uppercase tracking-wider rounded-2xl shadow-lg shadow-amber-500/25 hover:opacity-95 transition transform active:scale-98 cursor-pointer">
+                    <i class="fa-solid fa-play mr-2"></i> Start Anime Draft
+                </button>
+            </form>
+        </section>
+
+        <!-- ==================== 2. AUCTION SCREEN ==================== -->
+        <section id="auction-screen" class="hidden grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- LEFT PANEL: PLAYERS & LIVE ROSTERS (4 cols) -->
+            <div class="lg:col-span-4 space-y-4 order-2 lg:order-1">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-md">
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-between">
+                        <span><i class="fa-solid fa-clipboard-list text-amber-400 mr-1"></i> Player Rosters</span>
+                        <span id="draft-progress-badge" class="px-2 py-0.5 bg-slate-800 text-amber-400 rounded text-[10px] font-bold">0 / 0 Drafted</span>
+                    </h3>
+                    <div id="rosters-container" class="space-y-3">
+                        <!-- Dynamic Player Cards Injected Here -->
+                    </div>
+                </div>
+
+                <!-- Deck Info Banner -->
+                <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-3.5 space-y-2 text-xs">
+                    <div class="flex justify-between items-center text-[11px] text-slate-400">
+                        <span>Deck Characters Remaining:</span>
+                        <span id="deck-remaining-count" class="font-mono text-amber-400 font-bold">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTER PANEL: AUCTION STAGE & HOST CONSOLE (8 cols) -->
+            <div class="lg:col-span-8 space-y-4 order-1 lg:order-2">
+                
+                <div class="bg-slate-900/95 border border-slate-800 rounded-3xl p-5 md:p-6 shadow-2xl relative overflow-hidden backdrop-blur-md glow-amber">
+                    
+                    <!-- Top Status Bar -->
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-800">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span id="anime-mode-indicator" class="text-xs font-black uppercase tracking-wider text-amber-400">Jujutsu Kaisen</span>
+                        </div>
+                        <span class="text-xs text-slate-400 font-bold">Host Direct Console</span>
+                    </div>
+
+                    <!-- Auction Stage Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 my-4 items-center">
+                        
+                        <!-- CHARACTER DISPLAY CARD (5 cols) -->
+                        <div class="md:col-span-5 flex justify-center">
+                            <div id="stage-card" class="w-full max-w-xs bg-slate-950 border-2 border-amber-500/80 rounded-2xl p-6 shadow-xl shadow-amber-500/10 relative animate-card-slide text-center space-y-3">
+                                <!-- Dynamic Character Card Injected Here -->
+                            </div>
+                        </div>
+
+                        <!-- HOST AUCTION SALE CONTROLS (7 cols) -->
+                        <div class="md:col-span-7 space-y-4">
+                            
+                            <div class="bg-slate-800/60 p-4 rounded-2xl border border-slate-700/80 space-y-3.5">
+                                <div class="text-xs font-black text-slate-300 uppercase tracking-wider flex justify-between">
+                                    <span><i class="fa-solid fa-gavel text-amber-400 mr-1"></i> Direct Sale Control</span>
+                                    <span class="text-[10px] text-amber-400 font-bold">$0 Free Claim Active</span>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <!-- Winning Player Dropdown -->
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Winning Player</label>
+                                        <select id="host-player-select" onchange="app.updateSellButtonLabel()" class="w-full bg-slate-900 border border-slate-700 rounded-xl text-white text-xs font-extrabold px-3 py-2.5 focus:border-amber-400 outline-none">
+                                            <!-- Dynamic Dropdown -->
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Winning Price Input -->
+                                    <div>
+                                        <div class="flex justify-between items-center mb-1">
+                                            <label class="block text-[10px] font-bold text-slate-400 uppercase">Winning Bid ($)</label>
+                                            <span class="text-[9px] text-amber-400 font-bold">*Enter $0 if player has $0 budget</span>
+                                        </div>
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-amber-400 font-bold text-xs">$</span>
+                                            <input type="number" id="host-bid-input" min="0" max="100" placeholder="Enter bid ($0 allowed)" 
+                                                class="w-full pl-7 pr-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-extrabold text-xs outline-none focus:border-amber-400">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="app.finalizeDirectSale()" id="btn-sell-direct" class="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-400 hover:from-amber-400 hover:to-orange-300 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-md transition flex items-center justify-center gap-2 cursor-pointer">
+                                    <i class="fa-solid fa-check-double text-sm"></i> Sell Character
+                                </button>
+                            </div>
+
+                            <!-- Skip / Discard Control -->
+                            <div>
+                                <button onclick="app.discardCharacter()" class="w-full py-2.5 bg-red-950/60 hover:bg-red-900/80 text-red-400 font-extrabold rounded-xl text-xs border border-red-800/60 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <i class="fa-solid fa-ban"></i> Discard / Skip Character
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Host Activity Feed Log -->
+                    <div class="mt-4 pt-3 border-t border-slate-800">
+                        <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">Host Activity Feed</span>
+                        <div id="host-feed-log" class="h-16 overflow-y-auto text-xs space-y-1 mt-1 font-mono text-slate-400 pr-2">
+                            <!-- Logs injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== 3. SUMMARY & AI PROMPT EXPORTER SCREEN ==================== -->
+        <section id="summary-screen" class="hidden max-w-6xl mx-auto w-full space-y-6 my-auto py-6">
+            
+            <div class="text-center space-y-2">
+                <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-black rounded-full uppercase tracking-widest">
+                    Draft Completed
+                </span>
+                <h2 class="text-4xl md:text-5xl font-black uppercase tracking-tight bg-gradient-to-r from-amber-400 via-orange-200 to-white bg-clip-text text-transparent">
+                    Anime Squad Rosters
+                </h2>
+                <p class="text-slate-400 text-xs md:text-sm max-w-xl mx-auto">
+                    All teams are complete! Copy the battle prompt below and paste into ChatGPT or Gemini to evaluate the winning squad!
+                </p>
+            </div>
+
+            <!-- AI Prompt Exporter Box -->
+            <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-900 border-2 border-amber-500/80 rounded-3xl p-6 shadow-2xl shadow-amber-500/10 text-center space-y-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 font-bold text-2xl mb-1">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <h3 class="text-xl font-black text-white">Generate AI Battle Referee Prompt</h3>
+                <p class="text-xs text-slate-400 max-w-lg mx-auto">
+                    Exports a clean prompt containing only player names and numbered character lists ready for AI battle simulation!
+                </p>
+                <button onclick="app.copyAIPrompt()" class="px-8 py-4 bg-gradient-to-r from-amber-500 via-orange-400 to-amber-400 hover:opacity-95 text-slate-950 font-black text-base uppercase tracking-wider rounded-2xl shadow-xl transition transform active:scale-95 inline-flex items-center gap-2.5 cursor-pointer">
+                    <i class="fa-solid fa-copy text-lg"></i> Copy AI Battle Referee Prompt
+                </button>
+            </div>
+
+            <!-- Squad Rosters Grid -->
+            <div id="summary-squads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Injected dynamically -->
+            </div>
+
+            <!-- Reset Action -->
+            <div class="flex justify-center pt-4">
+                <button onclick="app.confirmReset()" class="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-bold rounded-xl text-xs uppercase tracking-wider transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-rotate-right"></i> Start New Anime Draft
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- AUDIO SYNTHESIZER -->
+    <script>
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+            }
+
+            toggleMute() {
+                this.muted = !this.muted;
+                const icon = document.getElementById('sound-icon');
+                icon.className = this.muted ? "fa-solid fa-volume-xmark text-red-400" : "fa-solid fa-volume-high text-amber-400";
+            }
+
+            playGavel() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(45, this.ctx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.12);
+            }
+
+            playDiscard() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playFanfare() {
+                if (this.muted) return;
+                this.init();
+                const notes = [261.63, 329.63, 392.00, 523.25];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.1 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.1);
+                    osc.stop(this.ctx.currentTime + idx * 0.1 + 0.3);
+                });
+            }
+        }
+
+        const audioManager = new SoundFX();
+    </script>
+
+    <!-- MAIN APP SCRIPT & COMPREHENSIVE ANIME DATABASE -->
+    <script>
+        const ANIME_DATABASE = {
+            // JUJUTSU KAISEN POOL (42 Characters)
+            jjk: [
+                { id: 'jjk1', name: 'Satoru Gojo' },
+                { id: 'jjk2', name: 'Ryomen Sukuna (Heian Form)' },
+                { id: 'jjk3', name: 'Ryomen Sukuna (Megumi Form)' },
+                { id: 'jjk4', name: 'Yuji Itadori' },
+                { id: 'jjk5', name: 'Megumi Fushiguro' },
+                { id: 'jjk6', name: 'Nobara Kugisaki' },
+                { id: 'jjk7', name: 'Yuta Okkotsu' },
+                { id: 'jjk8', name: 'Rika Orimoto (Queen of Curses)' },
+                { id: 'jjk9', name: 'Maki Zenin' },
+                { id: 'jjk10', name: 'Toji Fushiguro' },
+                { id: 'jjk11', name: 'Suguru Geto' },
+                { id: 'jjk12', name: 'Kenjaku' },
+                { id: 'jjk13', name: 'Mahito' },
+                { id: 'jjk14', name: 'Jogo' },
+                { id: 'jjk15', name: 'Hanami' },
+                { id: 'jjk16', name: 'Dagon' },
+                { id: 'jjk17', name: 'Choso' },
+                { id: 'jjk18', name: 'Kento Nanami' },
+                { id: 'jjk19', name: 'Aoi Todo' },
+                { id: 'jjk20', name: 'Kinji Hakari' },
+                { id: 'jjk21', name: 'Hajime Kashimo' },
+                { id: 'jjk22', name: 'Yuki Tsukumo' },
+                { id: 'jjk23', name: 'Hiromi Higuruma' },
+                { id: 'jjk24', name: 'Ryu Ishigori' },
+                { id: 'jjk25', name: 'Takako Uro' },
+                { id: 'jjk26', name: 'Fumihiko Takaba' },
+                { id: 'jjk27', name: 'Yorozu' },
+                { id: 'jjk28', name: 'Naoya Zenin (Cursed Spirit Form)' },
+                { id: 'jjk29', name: 'Mei Mei' },
+                { id: 'jjk30', name: 'Naobito Zenin' },
+                { id: 'jjk31', name: 'Toge Inumaki' },
+                { id: 'jjk32', name: 'Panda' },
+                { id: 'jjk33', name: 'Uraume' },
+                { id: 'jjk34', name: 'Kurourushi' },
+                { id: 'jjk35', name: 'Smallpox Deity Cursed Spirit' },
+                { id: 'jjk36', name: 'Finger Bearer Cursed Spirit' },
+                { id: 'jjk37', name: 'Eso & Kechizu' },
+                { id: 'jjk38', name: 'Reggie Star' },
+                { id: 'jjk39', name: 'Dhruv Lakdawala' },
+                { id: 'jjk40', name: 'Atsuya Kusakabe' },
+                { id: 'jjk41', name: 'Masamichi Yaga' },
+                { id: 'jjk42', name: 'Yoshinobu Gakuganji' }
+            ],
+
+            // BLACK CLOVER POOL (40 Characters)
+            black_clover: [
+                { id: 'bc1', name: 'Asta' },
+                { id: 'bc2', name: 'Yuno Grinberryall' },
+                { id: 'bc3', name: 'Yami Sukehiro' },
+                { id: 'bc4', name: 'Julius Novachrono' },
+                { id: 'bc5', name: 'Lucius Zogratis' },
+                { id: 'bc6', name: 'Lucifero (King of Devils)' },
+                { id: 'bc7', name: 'Beelzebub' },
+                { id: 'bc8', name: 'Megicula' },
+                { id: 'bc9', name: 'Zagred (Word Soul Devil)' },
+                { id: 'bc10', name: 'Naamah & Lilith (Supreme Devils)' },
+                { id: 'bc11', name: 'Adrammelech' },
+                { id: 'bc12', name: 'Licht' },
+                { id: 'bc13', name: 'Lumiere Silvamillion Clover (First Wizard King)' },
+                { id: 'bc14', name: 'Mereoleona Vermillion' },
+                { id: 'bc15', name: 'Noelle Silva' },
+                { id: 'bc16', name: 'Nacht Faust' },
+                { id: 'bc17', name: 'Fuegoleon Vermillion' },
+                { id: 'bc18', name: 'Nozel Silva' },
+                { id: 'bc19', name: 'William Vangeance' },
+                { id: 'bc20', name: 'Patri (Leader of Eye of the Midnight Sun)' },
+                { id: 'bc21', name: 'Zenon Zogratis' },
+                { id: 'bc22', name: 'Dante Zogratis' },
+                { id: 'bc23', name: 'Vanica Zogratis' },
+                { id: 'bc24', name: 'Charlotte Roselei' },
+                { id: 'bc25', name: 'Rill Boismortier' },
+                { id: 'bc26', name: 'Dorothy Unsworth' },
+                { id: 'bc27', name: 'Jack the Ripper' },
+                { id: 'bc28', name: 'Kaiser Granvorka' },
+                { id: 'bc29', name: 'Charmy Pappitson' },
+                { id: 'bc30', name: 'Luck Voltia' },
+                { id: 'bc31', name: 'Magna Swing' },
+                { id: 'bc32', name: 'Zora Ideale' },
+                { id: 'bc33', name: 'Secre Swallowtail' },
+                { id: 'bc34', name: 'Gadjah (Spirit Guardian)' },
+                { id: 'bc35', name: 'Finral Roulacase' },
+                { id: 'bc36', name: 'Langris Vaude' },
+                { id: 'bc37', name: 'Vetto' },
+                { id: 'bc38', name: 'Fana' },
+                { id: 'bc39', name: 'Rhadodes' },
+                { id: 'bc40', name: 'Liebe (Anti-Magic Devil)' }
+            ],
+
+            // DEMON SLAYER POOL (38 Characters)
+            demon_slayer: [
+                { id: 'ds1', name: 'Yoriichi Tsugikuni' },
+                { id: 'ds2', name: 'Muzan Kibutsuji' },
+                { id: 'ds3', name: 'Kokushibo (Upper Moon 1)' },
+                { id: 'ds4', name: 'Doma (Upper Moon 2)' },
+                { id: 'ds5', name: 'Akaza (Upper Moon 3)' },
+                { id: 'ds6', name: 'Gyomei Himejima' },
+                { id: 'ds7', name: 'Sanemi Shinazugawa' },
+                { id: 'ds8', name: 'Giyu Tomioka' },
+                { id: 'ds9', name: 'Obanai Iguro' },
+                { id: 'ds10', name: 'Muichiro Tokito' },
+                { id: 'ds11', name: 'Kyojuro Rengoku' },
+                { id: 'ds12', name: 'Tengen Uzui' },
+                { id: 'ds13', name: 'Mitsuri Kanroji' },
+                { id: 'ds14', name: 'Shinobu Kocho' },
+                { id: 'ds15', name: 'Tanjiro Kamado (Demon King Form)' },
+                { id: 'ds16', name: 'Tanjiro Kamado' },
+                { id: 'ds17', name: 'Nezuko Kamado' },
+                { id: 'ds18', name: 'Zenitsu Agatsuma' },
+                { id: 'ds19', name: 'Inosuke Hashibira' },
+                { id: 'ds20', name: 'Kanao Tsuyuri' },
+                { id: 'ds21', name: 'Genya Shinazugawa' },
+                { id: 'ds22', name: 'Hantengu (Upper Moon 4)' },
+                { id: 'ds23', name: 'Zohakuten' },
+                { id: 'ds24', name: 'Gyokko (Upper Moon 5)' },
+                { id: 'ds25', name: 'Gyutaro & Daki (Upper Moon 6)' },
+                { id: 'ds26', name: 'Kaigaku' },
+                { id: 'ds27', name: 'Nakime (Biwa Demon)' },
+                { id: 'ds28', name: 'Enmu (Lower Moon 1)' },
+                { id: 'ds29', name: 'Rui (Lower Moon 5)' },
+                { id: 'ds30', name: 'Susamaru & Yahaba' },
+                { id: 'ds31', name: 'Kyogai (Tsuzumi Demon)' },
+                { id: 'ds32', name: 'Kanae Kocho' },
+                { id: 'ds33', name: 'Sabito' },
+                { id: 'ds34', name: 'Makomo' },
+                { id: 'ds35', name: 'Jigoro Kuwajima' },
+                { id: 'ds36', name: 'Sakonji Urokodaki' },
+                { id: 'ds37', name: 'Shinjuro Rengoku' },
+                { id: 'ds38', name: 'Tamayo & Yushiro' }
+            ],
+
+            // CHAINSAW MAN POOL (33 Characters)
+            chainsaw_man: [
+                { id: 'cm1', name: 'Denji' },
+                { id: 'cm2', name: 'Chainsaw Man (Pochita Form)' },
+                { id: 'cm3', name: 'Pochita (Chainsaw Devil)' },
+                { id: 'cm4', name: 'Makima (Control Devil)' },
+                { id: 'cm5', name: 'Power (Blood Fiend)' },
+                { id: 'cm6', name: 'Aki Hayakawa' },
+                { id: 'cm7', name: 'Himeno' },
+                { id: 'cm8', name: 'Masahiko Kishibe' },
+                { id: 'cm9', name: 'Kobeni Higashiyama' },
+                { id: 'cm10', name: 'Angel Devil' },
+                { id: 'cm11', name: 'Reze (Bomb Devil)' },
+                { id: 'cm12', name: 'Quanxi' },
+                { id: 'cm13', name: 'Beam (Shark Fiend)' },
+                { id: 'cm14', name: 'Galgali (Violence Fiend)' },
+                { id: 'cm15', name: 'Santa Claus' },
+                { id: 'cm16', name: 'Tolka' },
+                { id: 'cm17', name: 'Pingzi' },
+                { id: 'cm18', name: 'Katana Man' },
+                { id: 'cm19', name: 'Yoru (War Devil)' },
+                { id: 'cm20', name: 'Asa Mitaka' },
+                { id: 'cm21', name: 'Yoshida Hirofumi' },
+                { id: 'cm22', name: 'Nayuta (Control Devil)' },
+                { id: 'cm23', name: 'Fami (Famine Devil)' },
+                { id: 'cm24', name: 'Falling Devil' },
+                { id: 'cm25', name: 'Gun Devil' },
+                { id: 'cm26', name: 'Darkness Devil' },
+                { id: 'cm27', name: 'Death Devil' },
+                { id: 'cm28', name: 'Eternity Devil' },
+                { id: 'cm29', name: 'Ghost Devil' },
+                { id: 'cm30', name: 'Curse Devil' },
+                { id: 'cm31', name: 'Bat Devil' },
+                { id: 'cm32', name: 'Fox Devil (Kon)' },
+                { id: 'cm33', name: 'Kusakabe' }
+            ]
+        };
+
+        // ---------- CHARACTER IMAGES (loaded live from the free AniList API) ----------
+        const ANIME_KEYWORDS = {
+            jjk: ['jujutsu'],
+            black_clover: ['black clover'],
+            demon_slayer: ['kimetsu', 'demon slayer'],
+            chainsaw_man: ['chainsaw']
+        };
+
+        const CHAR_BY_ID = {};
+        Object.values(ANIME_DATABASE).forEach(list => list.forEach(c => { CHAR_BY_ID[c.id] = c; }));
+
+        const imageService = {
+            api: 'https://graphql.anilist.co',
+            storeKey: 'animeDraftImgCacheV2',
+            cache: {},
+            pending: {},
+            chain: Promise.resolve(),
+            warned: false,
+
+            init() {
+                try { this.cache = JSON.parse(localStorage.getItem(this.storeKey) || '{}'); } catch (e) { this.cache = {}; }
+            },
+
+            save() {
+                try { localStorage.setItem(this.storeKey, JSON.stringify(this.cache)); } catch (e) {}
+            },
+
+            warn(msg) {
+                if (this.warned) return;
+                this.warned = true;
+                try { app.showToast(msg); } catch (e) {}
+            },
+
+            // One shared queue with a gap between calls, so we stay under AniList's rate limit
+            request(search) {
+                const body = JSON.stringify({
+                    query: 'query($s:String){Page(perPage:6){characters(search:$s,sort:FAVOURITES_DESC){name{full} image{large} media(perPage:5){nodes{title{romaji english native}}}}}}',
+                    variables: { s: search }
+                });
+                const run = async () => {
+                    for (let attempt = 0; attempt < 3; attempt++) {
+                        try {
+                            const res = await fetch(this.api, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                                body
+                            });
+                            if (res.status === 429) {
+                                const wait = (parseInt(res.headers.get('Retry-After')) || 5) * 1000;
+                                await new Promise(r => setTimeout(r, wait));
+                                continue;
+                            }
+                            if (!res.ok) { this.warn('Portrait service returned an error (' + res.status + ')'); return null; }
+                            const json = await res.json();
+                            return json && json.data && json.data.Page ? json.data.Page.characters : null;
+                        } catch (e) {
+                            this.warn('Could not reach the portrait service');
+                            return null;
+                        }
+                    }
+                    return null;
+                };
+                const result = this.chain.then(run);
+                this.chain = result.then(() => new Promise(r => setTimeout(r, 800)));
+                return result;
+            },
+
+            tokens(name) {
+                return name.toLowerCase()
+                    .replace(/\(.*?\)/g, ' ')
+                    .replace(/ou/g, 'o').replace(/uu/g, 'u')
+                    .replace(/[^a-z\s]/g, ' ')
+                    .split(/\s+/).filter(Boolean);
+            },
+
+            STOP: ['cursed', 'spirit', 'form', 'the', 'of', 'king', 'supreme', 'leader', 'devils', 'devil', 'fiend', 'upper', 'lower', 'moon', 'deity'],
+            failed: {},
+
+            meaningful(name) {
+                const all = this.tokens(name.split('&')[0]);
+                const kept = all.filter(t => !this.STOP.includes(t));
+                return kept.length ? kept : all;
+            },
+
+            pick(list, name, animeKey) {
+                if (!list || !list.length) return null;
+                const mine = this.meaningful(name);
+                const keys = ANIME_KEYWORDS[animeKey];
+                let best = null, bestScore = -1;
+                list.forEach(c => {
+                    if (!c.image || !c.image.large) return;
+                    const theirs = this.tokens(c.name.full || '');
+                    const inter = mine.filter(t => theirs.includes(t)).length;
+                    if (!inter) return;
+                    const titles = ((c.media && c.media.nodes) || [])
+                        .map(n => Object.values(n.title || {}).filter(Boolean).join(' ').toLowerCase()).join(' ');
+                    const fromShow = keys.some(k => titles.includes(k));
+                    // Accept a hit from the right show, or a full multi-word name match
+                    if (!fromShow && !(mine.length >= 2 && inter === mine.length)) return;
+                    const score = inter + (fromShow ? 10 : 0);
+                    if (score > bestScore) { best = c; bestScore = score; }
+                });
+                return best ? best.image.large : null;
+            },
+
+            // Full name first, then the last word, then the first word (covers spellings like Yuuji / Yuji)
+            queries(name) {
+                const clean = name.split('&')[0].replace(/\(.*?\)/g, '').trim();
+                const words = clean.split(/\s+/).filter(w => w.length > 2 && !this.STOP.includes(w.toLowerCase()));
+                const list = [clean];
+                if (words.length > 1) { list.push(words[words.length - 1]); list.push(words[0]); }
+                return [...new Set(list)];
+            },
+
+            resolve(id) {
+                if (id in this.cache) return Promise.resolve(this.cache[id]);
+                if (this.failed[id]) return Promise.resolve(null);
+                if (this.pending[id]) return this.pending[id];
+                const char = CHAR_BY_ID[id];
+                const animeKey = id.startsWith('jjk') ? 'jjk' : id.startsWith('bc') ? 'black_clover' : id.startsWith('ds') ? 'demon_slayer' : 'chainsaw_man';
+                this.pending[id] = (async () => {
+                    let url = null;
+                    for (const q of this.queries(char.name)) {
+                        const list = await this.request(q);
+                        url = this.pick(list, char.name, animeKey);
+                        if (url) break;
+                    }
+                    if (url) { this.cache[id] = url; this.save(); } else { this.failed[id] = true; }
+                    delete this.pending[id];
+                    return url;
+                })();
+                return this.pending[id];
+            },
+
+            initials(name) {
+                const t = name.replace(/\(.*?\)/g, '').trim().split(/\s+/);
+                return ((t[0] || '?')[0] + (t[1] ? t[1][0] : '')).toUpperCase();
+            },
+
+            // Markup for an image slot. Starts with initials, swaps to the portrait once it loads.
+            slot(char, sizeClasses, textClasses) {
+                return `<div data-char-img="${char.id}" class="${sizeClasses} flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-slate-800 to-slate-700 border border-slate-700 flex items-center justify-center font-black text-amber-400 ${textClasses}">${this.initials(char.name)}</div>`;
+            },
+
+            hydrate(root = document) {
+                root.querySelectorAll('[data-char-img]').forEach(el => {
+                    if (el.dataset.done) return;
+                    el.dataset.done = '1';
+                    this.resolve(el.dataset.charImg).then(url => {
+                        if (!url || !el.isConnected) return;
+                        const img = new Image();
+                        img.referrerPolicy = 'no-referrer';
+                        img.className = 'w-full h-full object-cover object-top';
+                        img.alt = CHAR_BY_ID[el.dataset.charImg].name;
+                        img.onload = () => { el.textContent = ''; el.appendChild(img); };
+                        img.src = url;
+                    });
+                });
+            }
+        };
+        imageService.init();
+
+        class App {
+            constructor() {
+                this.selectedAnime = 'jjk';
+                this.playerCount = 3;
+                this.players = [];
+                this.deck = [];
+                this.currentCharacter = null;
+            }
+
+            init() {
+                this.renderPlayerInputs();
+            }
+
+            showToast(msg) {
+                const toast = document.getElementById('toast');
+                document.getElementById('toast-msg').innerText = msg;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 2500);
+            }
+
+            selectAnime(animeKey) {
+                this.selectedAnime = animeKey;
+                ['bc', 'ds', 'jjk', 'cm'].forEach(key => {
+                    const card = document.getElementById(`card-anime-${key}`);
+                    if ((animeKey === 'black_clover' && key === 'bc') ||
+                        (animeKey === 'demon_slayer' && key === 'ds') ||
+                        (animeKey === 'jjk' && key === 'jjk') ||
+                        (animeKey === 'chainsaw_man' && key === 'cm')) {
+                        card.className = "cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/80 border-amber-500/80 shadow-lg shadow-amber-500/10";
+                    } else {
+                        card.className = "cursor-pointer p-4 rounded-2xl border-2 transition-all flex flex-col items-center text-center bg-slate-800/40 border-slate-700 hover:border-amber-500/50";
+                    }
+                });
+            }
+
+            setPlayerCount(count) {
+                this.playerCount = count;
+                [2, 3, 4].forEach(num => {
+                    const btn = document.getElementById(`btn-count-${num}`);
+                    btn.className = (num === count) 
+                        ? "py-2.5 bg-amber-500 text-slate-950 font-black rounded-xl text-xs border border-amber-400"
+                        : "py-2.5 bg-slate-800 border border-slate-700 font-bold rounded-xl text-xs hover:border-amber-400";
+                });
+                this.renderPlayerInputs();
+            }
+
+            renderPlayerInputs() {
+                const container = document.getElementById('player-inputs-container');
+                const defaultNames = ['Player 1', 'Player 2', 'Player 3', 'Player 4'];
+                let html = '';
+                for (let i = 0; i < this.playerCount; i++) {
+                    html += `
+                        <div>
+                            <input type="text" id="player-input-${i}" value="${defaultNames[i]}" required placeholder="Player ${i + 1} Name"
+                                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white outline-none focus:border-amber-400">
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
+            }
+
+            startDraft(e) {
+                e.preventDefault();
+                audioManager.init();
+
+                // Build Players Array
+                this.players = [];
+                for (let i = 0; i < this.playerCount; i++) {
+                    const nameVal = document.getElementById(`player-input-${i}`).value.trim() || `Player ${i + 1}`;
+                    this.players.push({
+                        id: i,
+                        name: nameVal,
+                        budget: 100,
+                        team: []
+                    });
+                }
+
+                // Copy & Shuffle Anime Deck
+                this.deck = [...ANIME_DATABASE[this.selectedAnime]].sort(() => Math.random() - 0.5);
+
+                // Screen Switch
+                document.getElementById('setup-screen').classList.add('hidden');
+                document.getElementById('auction-screen').classList.remove('hidden');
+                document.getElementById('auction-screen').classList.add('grid');
+
+                const animeTitles = {
+                    black_clover: 'Black Clover',
+                    demon_slayer: 'Demon Slayer',
+                    jjk: 'Jujutsu Kaisen',
+                    chainsaw_man: 'Chainsaw Man'
+                };
+                document.getElementById('anime-mode-indicator').innerText = animeTitles[this.selectedAnime];
+
+                this.nextAuctionRound();
+            }
+
+            nextAuctionRound() {
+                // Check if all players completed 5 squad slots
+                const allComplete = this.players.every(p => p.team.length >= 5);
+                if (allComplete || this.deck.length === 0) {
+                    this.endDraftSession();
+                    return;
+                }
+
+                this.currentCharacter = this.deck.pop();
+
+                this.renderStageCard();
+                this.renderRosters();
+                this.updateHostControls();
+
+                // Load portraits for what's on screen, then warm up the next few cards
+                imageService.hydrate();
+                this.deck.slice(-3).forEach(c => imageService.resolve(c.id));
+
+                document.getElementById('host-bid-input').value = '';
+
+                this.logFeed(`<span class="text-amber-400 font-bold">>>> Up for bidding: ${this.currentCharacter.name}</span>`);
+            }
+
+            renderStageCard() {
+                const stage = document.getElementById('stage-card');
+                const c = this.currentCharacter;
+
+                stage.innerHTML = `
+                    <div class="inline-block px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[10px] font-black rounded-full uppercase tracking-wider">
+                        Auction Block
+                    </div>
+
+                    <div class="pt-2">
+                        ${imageService.slot(c, 'w-full h-56 md:h-64', 'text-5xl')}
+                    </div>
+
+                    <div class="py-2">
+                        <h3 class="text-2xl md:text-3xl font-black text-white tracking-wide leading-snug">${c.name}</h3>
+                    </div>
+
+                    <div class="text-[10px] text-slate-500 uppercase font-extrabold tracking-widest pt-2 border-t border-slate-800">
+                        Target Squad Size: 5 Characters
+                    </div>
+                `;
+            }
+
+            renderRosters() {
+                const container = document.getElementById('rosters-container');
+                let totalDrafted = 0;
+
+                container.innerHTML = this.players.map(p => {
+                    totalDrafted += p.team.length;
+                    const isComplete = p.team.length >= 5;
+
+                    return `
+                        <div class="p-3 rounded-xl border ${isComplete ? 'bg-amber-950/30 border-amber-500/50' : 'bg-slate-800/60 border-slate-700/80'}">
+                            <div class="flex justify-between items-center mb-1.5">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-black text-xs text-white">${p.name}</span>
+                                    ${isComplete ? '<span class="text-[9px] bg-amber-500 text-slate-950 font-black px-1.5 py-0.2 rounded uppercase">TEAM COMPLETE</span>' : ''}
+                                </div>
+                                <span class="font-mono font-extrabold text-xs text-amber-400">$${p.budget}</span>
+                            </div>
+
+                            <div class="flex justify-between items-center text-[10px] text-slate-400 mb-2">
+                                <span>Squad: ${p.team.length} / 5</span>
+                                <span>${p.budget === 0 ? 'Free Claim Active ($0)' : 'Budget Remaining'}</span>
+                            </div>
+
+                            <div class="space-y-1">
+                                ${p.team.length === 0 
+                                    ? '<span class="text-[10px] text-slate-500 italic block">No characters drafted</span>'
+                                    : p.team.map((char, i) => `
+                                        <div class="px-2 py-1 bg-slate-950 border border-slate-800 rounded text-[10px] font-bold text-slate-300 flex items-center gap-2">
+                                            ${imageService.slot(char, 'w-8 h-8', 'text-[9px]')}
+                                            <span>${i + 1}. ${char.name}</span>
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                document.getElementById('draft-progress-badge').innerText = `${totalDrafted} / ${this.players.length * 5} Drafted`;
+                document.getElementById('deck-remaining-count').innerText = this.deck.length;
+            }
+
+            updateHostControls() {
+                const select = document.getElementById('host-player-select');
+                
+                // Allow ANY player who still needs squad slots
+                select.innerHTML = this.players.map((p, idx) => {
+                    const disabled = p.team.length >= 5;
+                    const zeroNotice = p.budget <= 0 ? ' [$0 Free Claim]' : ` (Budget: $${p.budget})`;
+                    return `<option value="${idx}" ${disabled ? 'disabled' : ''}>${p.name}${zeroNotice}</option>`;
+                }).join('');
+
+                this.updateSellButtonLabel();
+            }
+
+            updateSellButtonLabel() {
+                const select = document.getElementById('host-player-select');
+                const btn = document.getElementById('btn-sell-direct');
+                if (select.value !== "") {
+                    const p = this.players[parseInt(select.value)];
+                    if (p) {
+                        btn.innerHTML = `<i class="fa-solid fa-check-double text-sm"></i> Sell to ${p.name}`;
+                    }
+                }
+            }
+
+            finalizeDirectSale() {
+                const playerIdx = parseInt(document.getElementById('host-player-select').value);
+                const input = document.getElementById('host-bid-input');
+                let offerVal = parseInt(input.value);
+
+                if (isNaN(playerIdx)) {
+                    this.logFeed(`<span class="text-red-400">Please select a player!</span>`);
+                    return;
+                }
+
+                // Default to $0 if blank or negative
+                if (isNaN(offerVal) || offerVal < 0) {
+                    offerVal = 0;
+                }
+
+                const buyer = this.players[playerIdx];
+
+                if (buyer.team.length >= 5) {
+                    this.logFeed(`<span class="text-red-400">${buyer.name}'s team is already full!</span>`);
+                    return;
+                }
+
+                // $0 BALANCE / FREE CLAIM RULE
+                if (offerVal > buyer.budget) {
+                    if (buyer.budget === 0) {
+                        offerVal = 0; // Free claim assignment at $0
+                        this.logFeed(`<span class="text-amber-400">${buyer.name} has $0 balance — assigning ${this.currentCharacter.name} for $0 (Free Claim)!</span>`);
+                    } else {
+                        this.logFeed(`<span class="text-red-400">${buyer.name} only has $${buyer.budget} remaining! Lower bid to $${buyer.budget} or $0.</span>`);
+                        return;
+                    }
+                }
+
+                audioManager.playGavel();
+                buyer.budget = Math.max(0, buyer.budget - offerVal);
+                buyer.team.push({ ...this.currentCharacter });
+
+                this.logFeed(`<strong class="text-amber-400">🔥 SOLD! ${this.currentCharacter.name} drafted by ${buyer.name} for $${offerVal}!</strong>`);
+
+                input.value = '';
+
+                setTimeout(() => {
+                    this.nextAuctionRound();
+                }, 400);
+            }
+
+            discardCharacter() {
+                audioManager.playDiscard();
+                this.logFeed(`<span class="text-red-400">⚠️ ${this.currentCharacter.name} discarded/skipped.</span>`);
+                this.nextAuctionRound();
+            }
+
+            logFeed(msg) {
+                const feed = document.getElementById('host-feed-log');
+                const div = document.createElement('div');
+                div.innerHTML = `> ${msg}`;
+                feed.prepend(div);
+            }
+
+            endDraftSession() {
+                audioManager.playFanfare();
+                document.getElementById('auction-screen').classList.add('hidden');
+                document.getElementById('summary-screen').classList.remove('hidden');
+
+                this.renderSummarySquads();
+                imageService.hydrate();
+            }
+
+            renderSummarySquads() {
+                const container = document.getElementById('summary-squads-grid');
+                container.innerHTML = this.players.map((p, pIdx) => `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg">
+                        <div class="border-b border-slate-800 pb-2 flex justify-between items-center">
+                            <h4 class="font-black text-sm text-white">${p.name}</h4>
+                            <span class="text-[10px] text-amber-400 font-mono font-bold">${p.team.length} Characters</span>
+                        </div>
+                        
+                        <div class="space-y-1.5">
+                            ${p.team.map((char, cIdx) => `
+                                <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-xs font-bold text-slate-200 flex items-center gap-3">
+                                    ${imageService.slot(char, 'w-12 h-12', 'text-xs')}
+                                    <span>${cIdx + 1}. ${char.name}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            copyAIPrompt() {
+                const animeNames = {
+                    black_clover: 'Black Clover',
+                    demon_slayer: 'Demon Slayer',
+                    jjk: 'Jujutsu Kaisen',
+                    chainsaw_man: 'Chainsaw Man'
+                };
+
+                let prompt = `You are an elite Anime Battle Referee & Combat Analyst. We just finished an auction draft in the universe of [${animeNames[this.selectedAnime]}].\n\n`;
+
+                this.players.forEach((p, idx) => {
+                    prompt += `=== TEAM #${idx + 1}: ${p.name.toUpperCase()} ===\n`;
+                    p.team.forEach((char, cIdx) => {
+                        prompt += `${cIdx + 1}. ${char.name}\n`;
+                    });
+                    prompt += `\n`;
+                });
+
+                prompt += `=== YOUR BATTLE EVALUATION INSTRUCTIONS ===
+1. Analyze each team's combat capabilities, team synergy, techniques, and tactical matchups.
+2. Simulate a round-robin or battle royale tournament between all teams.
+3. Declare 1st Place (Winner), 2nd Place, and remaining rankings with clear reasoning explaining why the winning team overcomes the others in full battle!`;
+
+                // Clipboard Copy
+                const textarea = document.createElement('textarea');
+                textarea.value = prompt;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                this.showToast("AI Battle Referee Prompt copied to clipboard!");
+            }
+
+            confirmReset() {
+                if (confirm("Are you sure you want to exit and start a new anime draft?")) {
+                    document.getElementById('auction-screen').classList.add('hidden');
+                    document.getElementById('summary-screen').classList.add('hidden');
+                    document.getElementById('setup-screen').classList.remove('hidden');
+                }
+            }
+        }
+
+        const app = new App();
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>
